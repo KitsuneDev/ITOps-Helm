@@ -1,38 +1,51 @@
-{{- if .Values.ingress.enabled -}}
+{{- if .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
   name: {{ include "glpi.fullname" . }}
   labels:
     {{- include "glpi.labels" . | nindent 4 }}
-  {{- with .Values.ingress.annotations }}
   annotations:
+    {{- with .Values.ingress.annotations }}
     {{- toYaml . | nindent 4 }}
-  {{- end }}
+    {{- end }}
+    {{- if .Values.certManager.enabled }}
+    {{- if eq .Values.certManager.issuerKind "ClusterIssuer" }}
+    cert-manager.io/cluster-issuer: {{ .Values.certManager.issuerName | quote }}
+    {{- else }}
+    cert-manager.io/issuer: {{ .Values.certManager.issuerName | quote }}
+    {{- end }}
+    {{- if .Values.certManager.http01EditInPlace }}
+    acme.cert-manager.io/http01-edit-in-place: "true"
+    {{- end }}
+    {{- end }}
 spec:
   {{- with .Values.ingress.className }}
-  ingressClassName: {{ . }}
+  ingressClassName: {{ . | quote }}
   {{- end }}
-  {{- if .Values.ingress.tls }}
+
+  {{- with .Values.ingress.tls }}
   tls:
-    {{- range .Values.ingress.tls }}
+    {{- range . }}
     - hosts:
         {{- range .hosts }}
         - {{ . | quote }}
         {{- end }}
-      secretName: {{ .secretName }}
+      {{- if .secretName }}
+      secretName: {{ .secretName | quote }}
+      {{- end }}
     {{- end }}
   {{- end }}
+
+  {{- with .Values.ingress.hosts }}
   rules:
-    {{- range .Values.ingress.hosts }}
+    {{- range . }}
     - host: {{ .host | quote }}
       http:
         paths:
           {{- range .paths }}
-          - path: {{ .path }}
-            {{- with .pathType }}
-            pathType: {{ . }}
-            {{- end }}
+          - path: {{ .path | quote }}
+            pathType: {{ .pathType | default "ImplementationSpecific" }}
             backend:
               service:
                 name: {{ include "glpi.fullname" $ }}
@@ -40,4 +53,5 @@ spec:
                   number: {{ $.Values.service.port }}
           {{- end }}
     {{- end }}
+  {{- end }}
 {{- end }}

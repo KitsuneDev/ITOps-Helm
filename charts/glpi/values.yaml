@@ -117,3 +117,9 @@ nodeSelector: {}
 tolerations: []
 
 affinity: {}
+
+certManager:
+  enabled: false
+  issuerKind: ClusterIssuer   # or Issuer
+  issuerName: ""              # e.g., letsencrypt-prod
+  http01EditInPlace: false

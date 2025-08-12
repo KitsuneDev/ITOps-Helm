@@ -1,0 +1,98 @@
+﻿# file: questions.yaml
+questions:
+  - variable: image.tag
+    label: GLPI image tag (version)
+    description: Container image tag for glpi/glpi
+    type: string
+    required: true
+    default: "latest"
+    group: Image
+
+  - variable: mariadbSize
+    label: MariaDB storage size
+    description: PVC size for MariaDB (e.g., 8Gi, 20Gi)
+    type: string
+    required: true
+    default: "8Gi"
+    group: Storage
+
+  - variable: glpiSize
+    label: GLPI app storage size
+    description: PVC size for GLPI application data (e.g., 8Gi, 20Gi)
+    type: string
+    required: true
+    default: "8Gi"
+    group: Storage
+
+  - variable: ingress.enabled
+    label: Enable Ingress
+    description: Expose GLPI via an Ingress resource
+    type: boolean
+    default: true
+    group: Ingress
+    subquestions:
+      - variable: ingress.className
+        label: Ingress class name
+        description: e.g., traefik, nginx, haproxy
+        type: string
+        default: ""
+
+      - variable: ingress.hosts[0].host
+        label: Hostname
+        type: hostname
+        required: true
+        default: chart-example.local
+
+      - variable: ingress.hosts[0].paths[0].path
+        label: Path
+        type: string
+        required: true
+        default: "/"
+
+      - variable: ingress.hosts[0].paths[0].pathType
+        label: Path type
+        type: enum
+        options: [ImplementationSpecific, Prefix, Exact]
+        default: ImplementationSpecific
+
+      # TLS (leave secretName empty if you don't want a pre-existing secret;
+      # cert-manager can create it if annotations are set and hosts are specified)
+      - variable: ingress.tls[0].secretName
+        label: TLS secret name
+        description: Existing TLS secret for the hostname. Leave empty to let cert-manager create it.
+        type: string
+        default: ""
+
+      - variable: ingress.tls[0].hosts[0]
+        label: TLS host
+        type: hostname
+        default: chart-example.local
+
+      # --- cert-manager controls ---
+      - variable: certManager.enabled
+        label: Use cert-manager for certificates
+        description: Add cert-manager issuer annotations to the Ingress
+        type: boolean
+        default: false
+
+      - variable: certManager.issuerKind
+        label: Issuer kind
+        type: enum
+        options: [ClusterIssuer, Issuer]
+        default: ClusterIssuer
+        show_if: "certManager.enabled=true"
+
+      - variable: certManager.issuerName
+        label: Issuer name
+        description: Name of the cert-manager Issuer/ClusterIssuer
+        type: string
+        required: true
+        default: ""
+        show_if: "certManager.enabled=true"
+
+      - variable: certManager.http01EditInPlace
+        label: Use http01-edit-in-place
+        description: Set acme.cert-manager.io/http01-edit-in-place=true
+        type: boolean
+        default: false
+        show_if: "certManager.enabled=true"
