@@ -64,6 +64,36 @@ spec:
             mountPath: /data
       {{- end }}
 
+      - name: wait-for-mariadb
+        image: mariadb:latest
+        env:
+          - name: DB_HOST
+            value: {{ .Release.Name }}-mariadb
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mariadb-secret
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mariadb-secret
+                key: password
+        command: ["sh","-lc"]
+        args:
+          - |
+            set -e
+            echo "Waiting for MariaDB at $DB_HOST:3306…"
+            until mariadb-admin ping -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" --silent; do
+              sleep 2
+            done
+            # Ensure timezone tables are readable
+            until mariadb -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" -N -B -e "SELECT 1 FROM mysql.time_zone_name LIMIT 1;" >/dev/null 2>&1; do
+              echo "Timezones not readable yet; retrying…"
+              sleep 2
+            done
+            echo "MariaDB ready and timezone tables accessible."
+
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         imagePullPolicy: {{ .Values.image.pullPolicy }}
@@ -116,6 +146,8 @@ spec:
                 optional: false
           - name: GLPI_DB_NAME
             value: glpi
+          - name: GLPI_DB_PORT
+            value: "3306"
 
       securityContext:
         runAsUser: 0
