@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "glpi.fullname" . }}
+  labels:
+    {{- include "glpi.labels" . | nindent 4 }}
+spec:
+  {{- if not .Values.autoscaling.enabled }}
+  replicas: {{ .Values.replicaCount }}
+  {{- end }}
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}
+        version: v10.0.3
+    spec:
+      {{- with .Values.imagePullSecrets }}
+      imagePullSecrets:
+        {{- toYaml . | nindent 8 }}
+      {{- end }}
+
+      # Wait for DB to accept connections AND allow timezone reads
+      initContainers:
+      - name: wait-for-mariadb
+        image: mariadb:latest
+        env:
+          - name: DB_HOST
+            value: {{ .Release.Name }}-mariadb
+          - name: DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mariadb-secret
+                key: username
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mariadb-secret
+                key: password
+        command: ["sh","-lc"]
+        args:
+          - |
+            set -e
+            echo "Waiting for MariaDB at $DB_HOST:3306…"
+            until mariadb-admin ping -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" --silent; do
+              sleep 2
+            done
+            # Ensure timezone tables are readable
+            until mariadb -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" -N -B -e "SELECT 1 FROM mysql.time_zone_name LIMIT 1;" >/dev/null 2>&1; do
+              echo "Timezones not readable yet; retrying…"
+              sleep 2
+            done
+            echo "MariaDB ready and timezone tables accessible."
+
+      containers:
+      - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        name:  {{ .Release.Name }}
+        ports:
+        - containerPort: 80
+          name: http
+          protocol: TCP
+
+        # Give GLPI time to do first-run setup; then only mark Ready when HTTP works
+        startupProbe:
+          httpGet:
+            path: /
+            port: 80
+          failureThreshold: 30   # ~5 minutes (30*10s)
+          periodSeconds: 10
+        readinessProbe:
+          httpGet:
+            path: /
+            port: 80
+          initialDelaySeconds: 5
+          periodSeconds: 10
+          failureThreshold: 3
+
+        volumeMounts:
+          - name: {{ .Release.Name }}-pv-storage
+            mountPath: /var/glpi
+        env:
+          - name: GLPI_DB_HOST
+            value: {{ .Release.Name }}-mariadb
+          - name: GLPI_DB_USER
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mariadb-secret
+                key: username
+                optional: false
+          - name: GLPI_DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: {{ .Release.Name }}-mariadb-secret
+                key: password
+                optional: false
+          - name: GLPI_DB_NAME
+            value: glpi
+
+      securityContext:
+        runAsUser: 0
+        fsGroup: 33
+      volumes:
+      - name: {{ .Release.Name }}-pv-storage
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-pv-claim

@@ -1,0 +1,101 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Release.Name }}-mariadb
+spec:
+  selector:
+    matchLabels:
+      app: {{ .Release.Name }}-mariadb
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: {{ .Release.Name }}-mariadb
+    spec:
+      containers:
+      - image: mariadb:latest
+        name: {{ .Release.Name }}-mariadb
+        env:
+        - name: MYSQL_ROOT_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-mariadb-secret
+              key: root_password
+              optional: false
+        - name: MYSQL_USER
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-mariadb-secret
+              key: username
+              optional: false
+        - name: MYSQL_PASSWORD
+          valueFrom:
+            secretKeyRef:
+              name: {{ .Release.Name }}-mariadb-secret
+              key: password
+              optional: false
+        - name: MYSQL_DATABASE
+          value: glpi
+
+        ports:
+        - containerPort: 3306
+          name: {{ .Release.Name }}-db
+
+        # Wait for mysqld, load timezones if empty, and grant SELECT on timezone tables
+        lifecycle:
+          postStart:
+            exec:
+              command:
+                - sh
+                - -lc
+                - |
+                  set -eu
+                  echo "[postStart] waiting for mariadb..." >&2
+                  i=0; until mariadb-admin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" --silent; do
+                    i=$((i+1)); [ $i -ge 150 ] && { echo "[postStart] timeout waiting for DB" >&2; exit 0; }
+                    sleep 2
+                  done
+
+                  # If the table doesn't exist yet, COUNT query will fail—treat as 0
+                  COUNT="$(mariadb -N -B -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" -e "SELECT COUNT(*) FROM mysql.time_zone_name" 2>/dev/null || echo 0)"
+                  if [ "$COUNT" -eq 0 ]; then
+                    echo "[postStart] loading timezone tables..." >&2
+                    mariadb-tzinfo-to-sql /usr/share/zoneinfo | mariadb -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" mysql || echo "[postStart] tz load skipped/failed" >&2
+                  else
+                    echo "[postStart] timezone tables present (rows: $COUNT)" >&2
+                  fi
+
+                  echo "[postStart] granting timezone SELECT to app user..." >&2
+                  mariadb -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" -e "
+                    CREATE USER IF NOT EXISTS '${MYSQL_USER}'@'%' IDENTIFIED BY '${MYSQL_PASSWORD}';
+                    GRANT SELECT ON mysql.time_zone_name            TO '${MYSQL_USER}'@'%';
+                    GRANT SELECT ON mysql.time_zone                 TO '${MYSQL_USER}'@'%';
+                    GRANT SELECT ON mysql.time_zone_transition      TO '${MYSQL_USER}'@'%';
+                    GRANT SELECT ON mysql.time_zone_transition_type TO '${MYSQL_USER}'@'%';
+                    GRANT SELECT ON mysql.time_zone_leap_second     TO '${MYSQL_USER}'@'%';
+                    FLUSH PRIVILEGES;
+                  " || echo "[postStart] grant step failed (will rely on retries or manual grant)" >&2
+
+        readinessProbe:
+          exec:
+            command:
+              - sh
+              - -c
+              - mariadb-admin ping -h 127.0.0.1 -uroot -p"$MYSQL_ROOT_PASSWORD" --silent
+          initialDelaySeconds: 10
+          periodSeconds: 5
+        livenessProbe:
+          tcpSocket:
+            port: 3306
+          initialDelaySeconds: 30
+          periodSeconds: 10
+
+        volumeMounts:
+        - name: {{ .Release.Name }}-mariadb-pv-storage
+          mountPath: /var/lib/mysql
+
+      volumes:
+      - name: {{ .Release.Name }}-mariadb-pv-storage
+        persistentVolumeClaim:
+          claimName: {{ .Release.Name }}-mariadb-pv-claim
