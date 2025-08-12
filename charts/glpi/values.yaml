@@ -129,3 +129,14 @@ ingressForm:
   tls:
     enabled: false
     secretName: ""   # if set, cert-manager can still fill it; leave empty to let CM create it
+
+extraAppDirs:
+  - mountPath: /var/www/glpi/plugins
+    subPath: glpi-plugins
+  - mountPath: /var/www/glpi/pics
+    subPath: glpi-pics
+  - mountPath: /var/www/glpi/marketplace
+    subPath: glpi-marketplace
+
+# If you want to bootstrap with the image’s existing content on first run:
+bootstrapCopyDefaults: true

@@ -22,37 +22,47 @@ spec:
         {{- toYaml . | nindent 8 }}
       {{- end }}
 
-      # Wait for DB to accept connections AND allow timezone reads
+      # Init: create subPath directories on the PVC
       initContainers:
-      - name: wait-for-mariadb
-        image: mariadb:latest
-        env:
-          - name: DB_HOST
-            value: {{ .Release.Name }}-mariadb
-          - name: DB_USER
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Release.Name }}-mariadb-secret
-                key: username
-          - name: DB_PASSWORD
-            valueFrom:
-              secretKeyRef:
-                name: {{ .Release.Name }}-mariadb-secret
-                key: password
+      - name: init-glpi-app-dirs
+        image: busybox:1.36
+        command: ["sh","-lc"]
+        args:
+          - >
+            set -eu;
+            {{- range .Values.extraAppDirs }}
+            mkdir -p "/data/{{ .subPath }}";
+            chown -R 33:33 "/data/{{ .subPath }}";
+            {{- end }}
+        volumeMounts:
+          - name: {{ .Release.Name }}-pv-storage
+            mountPath: /data
+
+      {{- if .Values.bootstrapCopyDefaults }}
+      # Optional: copy defaults from the GLPI image into empty subPaths (first run)
+      - name: bootstrap-glpi-defaults
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
         command: ["sh","-lc"]
         args:
           - |
-            set -e
-            echo "Waiting for MariaDB at $DB_HOST:3306…"
-            until mariadb-admin ping -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" --silent; do
-              sleep 2
-            done
-            # Ensure timezone tables are readable
-            until mariadb -h "$DB_HOST" -u"$DB_USER" -p"$DB_PASSWORD" -N -B -e "SELECT 1 FROM mysql.time_zone_name LIMIT 1;" >/dev/null 2>&1; do
-              echo "Timezones not readable yet; retrying…"
-              sleep 2
-            done
-            echo "MariaDB ready and timezone tables accessible."
+            set -eu
+            {{- range .Values.extraAppDirs }}
+            if [ ! -d "/data/{{ .subPath }}" ] || [ -z "$(ls -A "/data/{{ .subPath }}" 2>/dev/null || true)" ]; then
+              echo "Bootstrapping {{ .mountPath }} -> /data/{{ .subPath }}"
+              mkdir -p "/data/{{ .subPath }}"
+              # Copy existing image content if any; ignore if source doesn't exist
+              if [ -d "{{ .mountPath }}" ]; then
+                cp -a "{{ .mountPath }}"/. "/data/{{ .subPath }}/" || true
+              fi
+              chown -R 33:33 "/data/{{ .subPath }}"
+            else
+              echo "Skipping {{ .mountPath }}; already initialized"
+            fi
+            {{- end }}
+        volumeMounts:
+          - name: {{ .Release.Name }}-pv-storage
+            mountPath: /data
+      {{- end }}
 
       containers:
       - image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
@@ -63,12 +73,11 @@ spec:
           name: http
           protocol: TCP
 
-        # Give GLPI time to do first-run setup; then only mark Ready when HTTP works
         startupProbe:
           httpGet:
             path: /
             port: 80
-          failureThreshold: 30   # ~5 minutes (30*10s)
+          failureThreshold: 30
           periodSeconds: 10
         readinessProbe:
           httpGet:
@@ -79,8 +88,17 @@ spec:
           failureThreshold: 3
 
         volumeMounts:
+          # Existing app data mount
           - name: {{ .Release.Name }}-pv-storage
             mountPath: /var/glpi
+
+          # New subPath mounts
+          {{- range .Values.extraAppDirs }}
+          - name: {{ $.Release.Name }}-pv-storage
+            mountPath: {{ .mountPath }}
+            subPath: {{ .subPath }}
+          {{- end }}
+
         env:
           - name: GLPI_DB_HOST
             value: {{ .Release.Name }}-mariadb
@@ -102,6 +120,7 @@ spec:
       securityContext:
         runAsUser: 0
         fsGroup: 33
+
       volumes:
       - name: {{ .Release.Name }}-pv-storage
         persistentVolumeClaim:
