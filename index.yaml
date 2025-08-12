@@ -3,6 +3,16 @@ entries:
   glpi:
   - apiVersion: v2
     appVersion: "11.0"
+    created: "2025-08-12T15:34:00.969450769Z"
+    description: GLPI for Kubernetes, powered by the new official images.
+    digest: bfe8e1a8cecc7ecde03b5617954dfce9f1358f8cbb6725e3402135437a75c163
+    name: glpi
+    type: application
+    urls:
+    - https://github.com/KitsuneDev/ITOps-Helm/releases/download/glpi-1.0.4/glpi-1.0.4.tgz
+    version: 1.0.4
+  - apiVersion: v2
+    appVersion: "11.0"
     created: "2025-08-12T15:10:40.186614393Z"
     description: GLPI for Kubernetes, powered by the new official images.
     digest: 90a6ec2814522b53134b23908047e612603cc1099eb0d459d57e82662339b871
@@ -31,4 +41,4 @@ entries:
     urls:
     - https://github.com/KitsuneDev/ITOps-Helm/releases/download/glpi-1.0.1/glpi-1.0.1.tgz
     version: 1.0.1
-generated: "2025-08-12T15:10:40.186628459Z"
+generated: "2025-08-12T15:34:00.969471268Z"
