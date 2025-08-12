@@ -123,3 +123,11 @@ certManager:
   issuerKind: ClusterIssuer   # or Issuer
   issuerName: ""              # e.g., letsencrypt-prod
   http01EditInPlace: false
+
+ingressForm:
+  host: chart-example.local
+  path: /
+  pathType: ImplementationSpecific
+  tls:
+    enabled: false
+    secretName: ""   # if set, cert-manager can still fill it; leave empty to let CM create it

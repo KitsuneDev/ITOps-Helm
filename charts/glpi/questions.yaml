@@ -26,47 +26,44 @@ questions:
 
   - variable: ingress.enabled
     label: Enable Ingress
-    description: Expose GLPI via an Ingress resource
     type: boolean
     default: true
     group: Ingress
     subquestions:
       - variable: ingress.className
         label: Ingress class name
-        description: e.g., traefik, nginx, haproxy
         type: string
         default: ""
 
-      - variable: ingress.hosts[0].host
+      - variable: ingressForm.host
         label: Hostname
         type: hostname
         required: true
         default: chart-example.local
 
-      - variable: ingress.hosts[0].paths[0].path
+      - variable: ingressForm.path
         label: Path
         type: string
         required: true
         default: "/"
 
-      - variable: ingress.hosts[0].paths[0].pathType
+      - variable: ingressForm.pathType
         label: Path type
         type: enum
         options: [ImplementationSpecific, Prefix, Exact]
         default: ImplementationSpecific
 
-      # TLS (leave secretName empty if you don't want a pre-existing secret;
-      # cert-manager can create it if annotations are set and hosts are specified)
-      - variable: ingress.tls[0].secretName
-        label: TLS secret name
-        description: Existing TLS secret for the hostname. Leave empty to let cert-manager create it.
+      - variable: ingressForm.tls.enabled
+        label: Enable TLS
+        type: boolean
+        default: false
+
+      - variable: ingressForm.tls.secretName
+        label: TLS secret name (optional)
+        description: Leave empty to let cert-manager create/populate it
         type: string
         default: ""
-
-      - variable: ingress.tls[0].hosts[0]
-        label: TLS host
-        type: hostname
-        default: chart-example.local
+        show_if: "ingressForm.tls.enabled=true"
 
       # --- cert-manager controls ---
       - variable: certManager.enabled
