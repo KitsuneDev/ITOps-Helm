@@ -1,0 +1,22 @@
+{{- if .Values.typebot_db.persistence.db_data.enabled }}
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  annotations:
+    katenary.v3/compose-hash: bbf12b5f763667374ef8faf63915c1e09a30fa7b
+    katenary.v3/version: master
+  labels:
+    {{- include "typebotio.labels" . | nindent 4 }}
+    katenary.v3/component: typebot_db
+  name: '{{ include "typebotio.fullname" . }}-typebot-db-db-data'
+spec:
+  accessModes:
+  {{- .Values.typebot_db.persistence.db_data.accessMode | toYaml | nindent 2 }}
+  resources:
+    requests:
+      storage: {{ tpl .Values.typebot_db.persistence.db_data.size $ }}
+  {{- if ne .Values.typebot_db.persistence.db_data.storageClass "-" }}
+  storageClassName: '{{ .Values.typebot_db.persistence.db_data.storageClass }}'
+  {{- end }}
+
+{{- end }}

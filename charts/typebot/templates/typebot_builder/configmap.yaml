@@ -1,0 +1,111 @@
+# templates/typebot-configmap.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "typebotio.fullname" . }}-typebot
+  labels:
+    {{- include "typebotio.labels" . | nindent 4 }}
+data:
+  # --- General optionals (emit only when provided) ---
+  {{- with .Values.typebot.ADMIN_EMAIL }}
+  ADMIN_EMAIL: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.typebot.DEFAULT_WORKSPACE_PLAN }}
+  DEFAULT_WORKSPACE_PLAN: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.typebot.DISABLE_SIGNUP }}
+  DISABLE_SIGNUP: {{ ternary "true" "false" . | quote }}
+  {{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID }}
+  NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.typebot.DEBUG }}
+  DEBUG: {{ ternary "true" "false" . | quote }}
+  {{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE }}
+  NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE: {{ . | quote }}
+  {{- end }}
+  {{- with .Values.typebot.CHAT_API_TIMEOUT }}
+  CHAT_API_TIMEOUT: {{ . | quote }}
+  {{- end }}
+
+  # --- SMTP (emit only if you’re using email) ---
+  {{- with .Values.typebot.SMTP_USERNAME }}SMTP_USERNAME: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.SMTP_PASSWORD }}SMTP_PASSWORD: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.SMTP_HOST }}SMTP_HOST: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.SMTP_PORT }}SMTP_PORT: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_SMTP_FROM }}NEXT_PUBLIC_SMTP_FROM: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.SMTP_SECURE }}SMTP_SECURE: {{ ternary "true" "false" . | quote }}{{- end }}
+  # this one expects the literal strings "true" | "false"
+  {{- with .Values.typebot.SMTP_IGNORE_TLS }}SMTP_IGNORE_TLS: {{ ternary "true" "false" . | quote }}{{- end }}
+  {{- with .Values.typebot.SMTP_AUTH_DISABLED }}SMTP_AUTH_DISABLED: {{ ternary "true" "false" . | quote }}{{- end }}
+
+  # --- OAuth providers (only emit when configured) ---
+  {{- with .Values.typebot.GITHUB_CLIENT_ID }}GITHUB_CLIENT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.GITHUB_CLIENT_SECRET }}GITHUB_CLIENT_SECRET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.GITLAB_CLIENT_ID }}GITLAB_CLIENT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.GITLAB_CLIENT_SECRET }}GITLAB_CLIENT_SECRET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.GITLAB_BASE_URL }}GITLAB_BASE_URL: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.GITLAB_REQUIRED_GROUPS }}GITLAB_REQUIRED_GROUPS: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.GITLAB_NAME }}GITLAB_NAME: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.FACEBOOK_CLIENT_ID }}FACEBOOK_CLIENT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.FACEBOOK_CLIENT_SECRET }}FACEBOOK_CLIENT_SECRET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.AZURE_AD_CLIENT_ID }}AZURE_AD_CLIENT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.AZURE_AD_CLIENT_SECRET }}AZURE_AD_CLIENT_SECRET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.AZURE_AD_TENANT_ID }}AZURE_AD_TENANT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.KEYCLOAK_CLIENT_ID }}KEYCLOAK_CLIENT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.KEYCLOAK_CLIENT_SECRET }}KEYCLOAK_CLIENT_SECRET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.KEYCLOAK_REALM }}KEYCLOAK_REALM: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.KEYCLOAK_BASE_URL }}KEYCLOAK_BASE_URL: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.CUSTOM_OAUTH_CLIENT_ID }}CUSTOM_OAUTH_CLIENT_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_CLIENT_SECRET }}CUSTOM_OAUTH_CLIENT_SECRET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_ISSUER }}CUSTOM_OAUTH_ISSUER: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_NAME }}CUSTOM_OAUTH_NAME: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_WELL_KNOWN_URL }}CUSTOM_OAUTH_WELL_KNOWN_URL: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_USER_ID_PATH }}CUSTOM_OAUTH_USER_ID_PATH: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_USER_NAME_PATH }}CUSTOM_OAUTH_USER_NAME_PATH: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_USER_EMAIL_PATH }}CUSTOM_OAUTH_USER_EMAIL_PATH: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_USER_IMAGE_PATH }}CUSTOM_OAUTH_USER_IMAGE_PATH: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.CUSTOM_OAUTH_SCOPE }}CUSTOM_OAUTH_SCOPE: {{ . | quote }}{{- end }}
+
+  # --- S3 / External services (emit only when provided; avoids “Invalid url”) ---
+  {{- with .Values.typebot.S3_ACCESS_KEY }}S3_ACCESS_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_SECRET_KEY }}S3_SECRET_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_BUCKET }}S3_BUCKET: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_PORT }}S3_PORT: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_ENDPOINT }}S3_ENDPOINT: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_SSL }}S3_SSL: {{ ternary "true" "false" . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_REGION }}S3_REGION: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.S3_PUBLIC_CUSTOM_DOMAIN }}S3_PUBLIC_CUSTOM_DOMAIN: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.NEXT_PUBLIC_GIPHY_API_KEY }}NEXT_PUBLIC_GIPHY_API_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_UNSPLASH_APP_NAME }}NEXT_PUBLIC_UNSPLASH_APP_NAME: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY }}NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_PEXELS_API_KEY }}NEXT_PUBLIC_PEXELS_API_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY }}NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY }}NEXT_PUBLIC_GOOGLE_FONTS_API_KEY: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.NEXT_PUBLIC_TOLGEE_API_KEY }}NEXT_PUBLIC_TOLGEE_API_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_TOLGEE_API_URL }}NEXT_PUBLIC_TOLGEE_API_URL: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.MESSAGE_WEBHOOK_URL }}MESSAGE_WEBHOOK_URL: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.USER_CREATED_WEBHOOK_URL }}USER_CREATED_WEBHOOK_URL: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.NEXT_PUBLIC_POSTHOG_KEY }}NEXT_PUBLIC_POSTHOG_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.POSTHOG_API_HOST }}POSTHOG_API_HOST: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.POSTHOG_PERSONAL_API_KEY }}POSTHOG_PERSONAL_API_KEY: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.POSTHOG_PROJECT_ID }}POSTHOG_PROJECT_ID: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.VERCEL_TOKEN }}VERCEL_TOKEN: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME }}NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.VERCEL_TEAM_ID }}VERCEL_TEAM_ID: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.META_SYSTEM_USER_TOKEN }}META_SYSTEM_USER_TOKEN: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID }}WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.WHATSAPP_PREVIEW_TEMPLATE_NAME }}WHATSAPP_PREVIEW_TEMPLATE_NAME: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.WHATSAPP_PREVIEW_TEMPLATE_LANG }}WHATSAPP_PREVIEW_TEMPLATE_LANG: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.WHATSAPP_CLOUD_API_URL }}WHATSAPP_CLOUD_API_URL: {{ . | quote }}{{- end }}
+  {{- with .Values.typebot.WHATSAPP_INTERACTIVE_GROUP_SIZE }}WHATSAPP_INTERACTIVE_GROUP_SIZE: {{ . | quote }}{{- end }}
+
+  {{- with .Values.typebot.NEXT_PUBLIC_PARTYKIT_HOST }}NEXT_PUBLIC_PARTYKIT_HOST: {{ . | quote }}{{- end }}

@@ -1,0 +1,19 @@
+﻿# local.values.yaml
+typebot:
+  NEXTAUTH_URL: "http://localhost:3000"          # builder
+  NEXT_PUBLIC_VIEWER_URL: "http://localhost:3001" # viewer
+  #ENCRYPTION_SECRET: "dev-32bytes-min-change-me-1234567890abcd"
+
+typebot_db:
+  enabled: true
+  persistence:
+    db_data:
+      enabled: false        # flip to true later if you want PVCs
+
+typebot_redis:
+  enabled: true
+  auth:
+    enabled: false
+  persistence:
+    redis_data:
+      enabled: false        # flip to true later if you want PVCs

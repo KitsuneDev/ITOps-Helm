@@ -1,0 +1,215 @@
+# values.yaml
+
+# Optional: image pull secrets
+# pullSecrets:
+#   - name: regcred
+
+# ---------------------------
+# Typebot app configuration
+# ---------------------------
+typebot:
+  # Required public URLs (valid URLs so schema passes; override for your domain or set to localhost for dev)
+  NEXTAUTH_URL: "https://typebot.example.com"
+  NEXT_PUBLIC_VIEWER_URL: "https://viewer.example.com"
+
+  # Leave null to auto-generate (exactly 32 chars) and persist in Secret.
+  # You can set your own 32-char ASCII value if you prefer.
+  ENCRYPTION_SECRET: ~
+
+  # Optional envs — uncomment only if you actually use them.
+  # ADMIN_EMAIL: "[email protected]"
+  # DISABLE_SIGNUP: false
+  # DEFAULT_WORKSPACE_PLAN: "FREE"
+  # NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID: ""
+  # DEBUG: false
+  # NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE: "10"
+  # CHAT_API_TIMEOUT: "60000"
+
+  # --- SMTP (optional) ---
+  # SMTP_USERNAME: ""
+  # SMTP_PASSWORD: ""
+  # SMTP_HOST: ""
+  # SMTP_PORT: 25
+  # NEXT_PUBLIC_SMTP_FROM: "'Typebot' <[email protected]>"
+  # SMTP_SECURE: false
+  # SMTP_IGNORE_TLS: false        # expects literal "true"/"false" when emitted
+  # SMTP_AUTH_DISABLED: false
+
+  # --- OAuth providers (optional) ---
+  # GITHUB_CLIENT_ID: ""
+  # GITHUB_CLIENT_SECRET: ""
+  # GITLAB_CLIENT_ID: ""
+  # GITLAB_CLIENT_SECRET: ""
+  # GITLAB_BASE_URL: "https://gitlab.com"
+  # GITLAB_REQUIRED_GROUPS: ""
+  # GITLAB_NAME: ""
+  # FACEBOOK_CLIENT_ID: ""
+  # FACEBOOK_CLIENT_SECRET: ""
+  # AZURE_AD_CLIENT_ID: ""
+  # AZURE_AD_CLIENT_SECRET: ""
+  # AZURE_AD_TENANT_ID: ""
+  # KEYCLOAK_CLIENT_ID: ""
+  # KEYCLOAK_CLIENT_SECRET: ""
+  # KEYCLOAK_REALM: ""
+  # KEYCLOAK_BASE_URL: ""
+  # CUSTOM_OAUTH_CLIENT_ID: ""
+  # CUSTOM_OAUTH_CLIENT_SECRET: ""
+  # CUSTOM_OAUTH_ISSUER: ""
+  # CUSTOM_OAUTH_NAME: ""
+  # CUSTOM_OAUTH_WELL_KNOWN_URL: ""
+  # CUSTOM_OAUTH_USER_ID_PATH: "id"
+  # CUSTOM_OAUTH_USER_NAME_PATH: "name"
+  # CUSTOM_OAUTH_USER_EMAIL_PATH: "email"
+  # CUSTOM_OAUTH_USER_IMAGE_PATH: "image"
+  # CUSTOM_OAUTH_SCOPE: "openid profile email"
+
+  # --- Google/Gmail/Sheets/Fonts (optional) ---
+  # GOOGLE_AUTH_CLIENT_ID: ""
+  # GOOGLE_AUTH_CLIENT_SECRET: ""
+  # GOOGLE_SHEETS_CLIENT_ID: ""
+  # GOOGLE_SHEETS_CLIENT_SECRET: ""
+  # NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY: ""
+  # GMAIL_CLIENT_ID: ""
+  # GMAIL_CLIENT_SECRET: ""
+  # NEXT_PUBLIC_GOOGLE_FONTS_API_KEY: ""
+
+  # --- S3 uploads (optional) ---
+  # S3_ACCESS_KEY: ""
+  # S3_SECRET_KEY: ""
+  # S3_BUCKET: "typebot"
+  # S3_PORT: "9000"
+  # S3_ENDPOINT: "https://s3.example.com"
+  # S3_SSL: true
+  # S3_REGION: "us-east-1"
+  # S3_PUBLIC_CUSTOM_DOMAIN: "https://cdn.example.com"
+
+  # --- Giphy / Unsplash / Pexels (optional) ---
+  # NEXT_PUBLIC_GIPHY_API_KEY: ""
+  # NEXT_PUBLIC_UNSPLASH_APP_NAME: ""
+  # NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: ""
+  # NEXT_PUBLIC_PEXELS_API_KEY: ""
+
+  # --- Tolgee (optional) ---
+  # NEXT_PUBLIC_TOLGEE_API_KEY: ""
+  # NEXT_PUBLIC_TOLGEE_API_URL: "https://tolgee.server.baptistearno.com"
+
+  # --- Webhooks / Analytics / Vercel (optional) ---
+  # MESSAGE_WEBHOOK_URL: ""
+  # USER_CREATED_WEBHOOK_URL: ""
+  # NEXT_PUBLIC_POSTHOG_KEY: ""
+  # POSTHOG_API_HOST: "https://eu.posthog.com"
+  # POSTHOG_PERSONAL_API_KEY: ""
+  # POSTHOG_PROJECT_ID: ""
+  # VERCEL_TOKEN: ""
+  # NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME: ""
+  # VERCEL_TEAM_ID: ""
+
+  # --- WhatsApp Preview (optional) ---
+  # META_SYSTEM_USER_TOKEN: ""
+  # WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID: ""
+  # WHATSAPP_PREVIEW_TEMPLATE_NAME: ""
+  # WHATSAPP_PREVIEW_TEMPLATE_LANG: "en_US"
+  # WHATSAPP_CLOUD_API_URL: "https://graph.facebook.com"
+  # WHATSAPP_INTERACTIVE_GROUP_SIZE: 3
+
+  # --- PartyKit (optional) ---
+  # NEXT_PUBLIC_PARTYKIT_HOST: ""
+
+  # --- Viewer 404 copy (optional) ---
+  # NEXT_PUBLIC_VIEWER_404_TITLE: "404"
+  # NEXT_PUBLIC_VIEWER_404_SUBTITLE: "The bot you’re looking for doesn’t exist"
+
+
+# ---------------------------
+# Builder (UI) workload
+# ---------------------------
+typebot_builder:
+  repository:
+    image: baptistearno/typebot-builder
+    tag: latest
+  replicas: 1
+  resources: {}
+  imagePullPolicy: IfNotPresent
+  nodeSelector: {}
+  serviceAccount: ""
+
+
+# ---------------------------
+# Viewer workload
+# ---------------------------
+typebot_viewer:
+  repository:
+    image: baptistearno/typebot-viewer
+    tag: latest
+  replicas: 1
+  resources: {}
+  imagePullPolicy: IfNotPresent
+  nodeSelector: {}
+  serviceAccount: ""
+
+
+# ---------------------------
+# Embedded Postgres
+# ---------------------------
+typebot_db:
+  enabled: true
+  replicas: 1
+  repository:
+    image: postgres
+    tag: "16-alpine"
+  imagePullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 5432
+    nameOverride: ""   # defaults to "<fullname>-postgres"
+
+  auth:
+    user: "postgres"
+    password: "typebot"     # for production, override via sealed secret or external DB
+    database: "typebot"
+
+  persistence:
+    db_data:
+      enabled: true         # set false for local dev if you lack a default StorageClass
+      size: 10Gi
+      storageClass: ""      # set a specific SC or leave empty to use default
+      accessMode:
+        - ReadWriteOnce
+
+  resources: {}
+  nodeSelector: {}
+  serviceAccount: ""
+
+
+# ---------------------------
+# Embedded Redis
+# ---------------------------
+typebot_redis:
+  enabled: true
+  replicas: 1
+  repository:
+    image: redis
+    tag: "7-alpine"
+  imagePullPolicy: IfNotPresent
+
+  service:
+    type: ClusterIP
+    port: 6379
+    nameOverride: ""   # defaults to "<fullname>-redis"
+
+  auth:
+    enabled: false
+    password: ""      # set only if enabled=true
+
+  persistence:
+    redis_data:
+      enabled: true    # set false for local dev if you lack a default StorageClass
+      size: 2Gi
+      storageClass: ""
+      accessMode:
+        - ReadWriteOnce
+
+  resources: {}
+  nodeSelector: {}
+  serviceAccount: ""

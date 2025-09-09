@@ -1,0 +1,67 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    katenary.v3/compose-hash: bbf12b5f763667374ef8faf63915c1e09a30fa7b
+    katenary.v3/version: master
+  labels:
+    {{- include "typebotio.labels" . | nindent 4 }}
+    katenary.v3/component: typebot_viewer
+  name: '{{ include "typebotio.fullname" . }}-typebot-viewer'
+spec:
+  replicas: {{ .Values.typebot_viewer.replicas }}
+  selector:
+    matchLabels:
+      {{- include "typebotio.selectorLabels" . | nindent 6 }}
+      katenary.v3/component: typebot_viewer
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        {{- include "typebotio.selectorLabels" . | nindent 8 }}
+        katenary.v3/component: typebot_viewer
+    spec:
+      containers:
+      - envFrom:
+        - secretRef:
+            name: {{ include "typebotio.fullname" . }}-typebot-env
+        - configMapRef:
+            name: {{ include "typebotio.fullname" . }}-typebot   # your existing non-secret vars
+        image: '{{ tpl .Values.typebot_viewer.repository.image $ }}:{{ tpl .Values.typebot_viewer.repository.tag $ | default "latest" }}'
+        imagePullPolicy: {{ .Values.typebot_viewer.imagePullPolicy }}
+        name: typebot-viewer
+        env:
+          - name: HOSTNAME
+            value: "0.0.0.0"
+          - name: PORT
+            value: "3000"
+        initContainers:
+          - name: wait-db
+            image: postgres:16-alpine
+            command: ["sh","-lc"]
+            args:
+              - |
+                for i in $(seq 1 60); do
+                  pg_isready -h {{ default (printf "%s-postgres" (include "typebotio.fullname" .)) .Values.typebot_db.service.nameOverride }} -p {{ .Values.typebot_db.service.port }} -U {{ .Values.typebot_db.auth.user }} && exit 0
+                  echo "waiting for postgres..."
+                  sleep 2
+                done
+                exit 1
+        ports:
+        - containerPort: 3000
+          name: port-3000
+        {{- if .Values.typebot_viewer.resources }}
+        resources:
+          {{ .Values.typebot_viewer.resources | toYaml | nindent 10 }}
+        {{- end }}
+      {{- if .Values.pullSecrets }}
+      imagePullSecrets:
+      {{- .Values.pullSecrets | toYaml | nindent 6 }}
+      {{- end }}
+      {{- if .Values.typebot_viewer.nodeSelector }}
+      nodeSelector:
+        {{- .Values.typebot_viewer.nodeSelector | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if ne .Values.typebot_viewer.serviceAccount "" }}
+      serviceAccountName: {{ .Values.typebot_viewer.serviceAccount | quote }}
+      {{- end }}

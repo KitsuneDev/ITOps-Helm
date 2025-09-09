@@ -1,0 +1,61 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    katenary.v3/compose-hash: bbf12b5f763667374ef8faf63915c1e09a30fa7b
+    katenary.v3/version: master
+  labels:
+    {{- include "typebotio.labels" . | nindent 4 }}
+    katenary.v3/component: typebot_db
+  name: '{{ include "typebotio.fullname" . }}-typebot-db'
+spec:
+  replicas: {{ .Values.typebot_db.replicas }}
+  selector:
+    matchLabels:
+      {{- include "typebotio.selectorLabels" . | nindent 6 }}
+      katenary.v3/component: typebot_db
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        {{- include "typebotio.selectorLabels" . | nindent 8 }}
+        katenary.v3/component: typebot_db
+    spec:
+      containers:
+      - envFrom:
+        - configMapRef:
+            name: '{{ include "typebotio.fullname" . }}-typebot-db'
+        image: '{{ tpl .Values.typebot_db.repository.image $ }}:{{ tpl .Values.typebot_db.repository.tag $ | default "latest" }}'
+        imagePullPolicy: {{ .Values.typebot_db.imagePullPolicy }}
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready -U postgres
+          periodSeconds: 5
+        name: typebot-db
+        {{- if .Values.typebot_db.resources }}
+        resources:
+          {{ .Values.typebot_db.resources | toYaml | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        {{- if .Values.typebot_db.persistence.db_data.enabled }}
+        - mountPath: /var/lib/postgresql/data
+          name: db-data
+        {{- end }}
+      {{- if .Values.pullSecrets }}
+      imagePullSecrets:
+      {{- .Values.pullSecrets | toYaml | nindent 6 }}
+      {{- end }}
+      {{- if .Values.typebot_db.nodeSelector }}
+      nodeSelector:
+        {{- .Values.typebot_db.nodeSelector | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if ne .Values.typebot_db.serviceAccount "" }}
+      serviceAccountName: {{ .Values.typebot_db.serviceAccount | quote }}
+      {{- end }}
+      volumes:
+      {{- if .Values.typebot_db.persistence.db_data.enabled }}
+      - name: db-data
+        persistentVolumeClaim:
+          claimName: '{{ include "typebotio.fullname" . }}-typebot-db-db-data'
+      {{- end }}

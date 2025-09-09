@@ -1,0 +1,64 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    katenary.v3/compose-hash: bbf12b5f763667374ef8faf63915c1e09a30fa7b
+    katenary.v3/version: master
+  labels:
+    {{- include "typebotio.labels" . | nindent 4 }}
+    katenary.v3/component: typebot_redis
+  name: '{{ include "typebotio.fullname" . }}-typebot-redis'
+spec:
+  replicas: {{ .Values.typebot_redis.replicas }}
+  selector:
+    matchLabels:
+      {{- include "typebotio.selectorLabels" . | nindent 6 }}
+      katenary.v3/component: typebot_redis
+  strategy: {}
+  template:
+    metadata:
+      labels:
+        {{- include "typebotio.selectorLabels" . | nindent 8 }}
+        katenary.v3/component: typebot_redis
+    spec:
+      containers:
+      - args:
+        - --save
+        - "60"
+        - "1"
+        - --loglevel
+        - warning
+        image: '{{ tpl .Values.typebot_redis.repository.image $ }}:{{ tpl .Values.typebot_redis.repository.tag $ | default "latest" }}'
+        imagePullPolicy: {{ .Values.typebot_redis.imagePullPolicy }}
+        livenessProbe:
+          exec:
+            command:
+            - redis-cli ping | grep PONG
+          periodSeconds: 30
+        name: typebot-redis
+        {{- if .Values.typebot_redis.resources }}
+        resources:
+          {{ .Values.typebot_redis.resources | toYaml | nindent 10 }}
+        {{- end }}
+        volumeMounts:
+        {{- if .Values.typebot_redis.persistence.redis_data.enabled }}
+        - mountPath: /data
+          name: redis-data
+        {{- end }}
+      {{- if .Values.pullSecrets }}
+      imagePullSecrets:
+      {{- .Values.pullSecrets | toYaml | nindent 6 }}
+      {{- end }}
+      {{- if .Values.typebot_redis.nodeSelector }}
+      nodeSelector:
+        {{- .Values.typebot_redis.nodeSelector | toYaml | nindent 8 }}
+      {{- end }}
+      {{- if ne .Values.typebot_redis.serviceAccount "" }}
+      serviceAccountName: {{ .Values.typebot_redis.serviceAccount | quote }}
+      {{- end }}
+      volumes:
+      {{- if .Values.typebot_redis.persistence.redis_data.enabled }}
+      - name: redis-data
+        persistentVolumeClaim:
+          claimName: '{{ include "typebotio.fullname" . }}-typebot-redis-redis-data'
+      {{- end }}
