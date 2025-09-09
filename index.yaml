@@ -71,4 +71,14 @@ entries:
     urls:
     - https://github.com/KitsuneDev/ITOps-Helm/releases/download/glpi-1.0.1/glpi-1.0.1.tgz
     version: 1.0.1
-generated: "2025-08-12T17:29:00.825013217Z"
+  typebotio:
+  - apiVersion: v2
+    appVersion: 0.1.0
+    created: "2025-09-09T22:02:30.940505166Z"
+    description: Typebot for Helm
+    digest: ef5729bf0bedff9670142cfb3488cca79acfdbad81e8b1e19221955b66398937
+    name: typebotio
+    urls:
+    - https://github.com/KitsuneDev/ITOps-Helm/releases/download/typebotio-0.1.0/typebotio-0.1.0.tgz
+    version: 0.1.0
+generated: "2025-09-09T22:02:30.940559318Z"
