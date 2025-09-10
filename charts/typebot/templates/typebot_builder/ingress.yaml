@@ -1,0 +1,44 @@
+{{- if .Values.ingress.builder.enabled }}
+{{- $fullname := include "typebotio.fullname" . -}}
+{{- $v := .Values.ingress.builder -}}
+{{- $class := $v.className | default "" -}}
+{{- $ann := dict -}}
+{{- if $v.annotations }}{{- $ann = merge $ann $v.annotations -}}{{- end -}}
+{{- if and $v.tls.enabled (eq $v.tls.source "cert-manager") -}}
+{{- $_ := set $ann "cert-manager.io/cluster-issuer" ($v.tls.clusterIssuer | default "letsencrypt") -}}
+{{- end -}}
+{{- $svcName := default (printf "%s-typebot" $fullname) $v.service.nameOverride -}}
+{{- $tlsSecret := default (printf "%s-builder-tls" $fullname) $v.tls.secretName -}}
+
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: {{ $fullname }}-ingress-builder
+  labels:
+    {{- include "typebotio.labels" . | nindent 4 }}
+  {{- if $ann }}
+  annotations:
+    {{- toYaml $ann | nindent 4 }}
+  {{- end }}
+spec:
+  {{- if $class }}
+  ingressClassName: {{ $class | quote }}
+  {{- end }}
+  rules:
+    - host: {{ $v.host | quote }}
+      http:
+        paths:
+          - path: {{ $v.path | default "/" | quote }}
+            pathType: Prefix
+            backend:
+              service:
+                name: {{ $svcName }}
+                port:
+                  number: {{ $v.service.port | default 80 }}
+  {{- if $v.tls.enabled }}
+  tls:
+    - hosts:
+        - {{ $v.host | quote }}
+      secretName: {{ $tlsSecret | quote }}
+  {{- end }}
+{{- end }}

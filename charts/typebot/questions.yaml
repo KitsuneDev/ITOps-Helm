@@ -1,0 +1,1008 @@
+﻿categories:
+  - Typebot
+labels:
+  io.cattle.role: project
+
+questions:
+  # Ingress - Builder
+  - variable: ingress.builder.enabled
+    label: Enable Builder Ingress
+    type: boolean
+    default: false
+    required: true
+    group: Ingress & SSL
+
+  - variable: ingress.builder.className
+    label: Builder IngressClass
+    type: string
+    default: ""
+    group: Ingress & SSL
+    show_if: "ingress.builder.enabled=true"
+
+  - variable: ingress.builder.host
+    label: Builder host
+    type: hostname
+    default: "typebot.example.com"
+    required: true
+    group: Ingress & SSL
+    show_if: "ingress.builder.enabled=true"
+
+  - variable: ingress.builder.tls.enabled
+    label: TLS for Builder
+    type: boolean
+    default: true
+    group: Ingress & SSL
+    show_if: "ingress.builder.enabled=true"
+
+  - variable: ingress.builder.tls.source
+    label: Builder TLS source
+    type: enum
+    options: ["cert-manager","secret"]
+    default: "cert-manager"
+    group: Ingress & SSL
+    show_if: "ingress.builder.enabled=true && ingress.builder.tls.enabled=true"
+
+  - variable: ingress.builder.tls.clusterIssuer
+    label: Builder cert-manager ClusterIssuer
+    type: string
+    default: "letsencrypt"
+    group: Ingress & SSL
+    show_if: "ingress.builder.enabled=true && ingress.builder.tls.enabled=true && ingress.builder.tls.source=cert-manager"
+
+  - variable: ingress.builder.tls.secretName
+    label: Builder TLS Secret name
+    type: string
+    default: ""
+    group: Ingress & SSL
+    show_if: "ingress.builder.enabled=true && ingress.builder.tls.enabled=true"
+
+  # Ingress - Viewer
+  - variable: ingress.viewer.enabled
+    label: Enable Viewer Ingress
+    type: boolean
+    default: true
+    required: true
+    group: Ingress & SSL
+
+  - variable: ingress.viewer.className
+    label: Viewer IngressClass
+    type: string
+    default: ""
+    group: Ingress & SSL
+    show_if: "ingress.viewer.enabled=true"
+
+  - variable: ingress.viewer.host
+    label: Viewer host
+    type: hostname
+    default: "bot.example.com"
+    required: true
+    group: Ingress & SSL
+    show_if: "ingress.viewer.enabled=true"
+
+  - variable: ingress.viewer.tls.enabled
+    label: TLS for Viewer
+    type: boolean
+    default: true
+    group: Ingress & SSL
+    show_if: "ingress.viewer.enabled=true"
+
+  - variable: ingress.viewer.tls.source
+    label: Viewer TLS source
+    type: enum
+    options: ["cert-manager","secret"]
+    default: "cert-manager"
+    group: Ingress & SSL
+    show_if: "ingress.viewer.enabled=true && ingress.viewer.tls.enabled=true"
+
+  - variable: ingress.viewer.tls.clusterIssuer
+    label: Viewer cert-manager ClusterIssuer
+    type: string
+    default: "letsencrypt"
+    group: Ingress & SSL
+    show_if: "ingress.viewer.enabled=true && ingress.viewer.tls.enabled=true && ingress.viewer.tls.source=cert-manager"
+
+  - variable: ingress.viewer.tls.secretName
+    label: Viewer TLS Secret name
+    type: string
+    default: ""
+    group: Ingress & SSL
+    show_if: "ingress.viewer.enabled=true && ingress.viewer.tls.enabled=true"
+
+
+  # =====================
+  # App URLs (must match ingress if enabled)
+  # =====================
+  - variable: typebot.NEXTAUTH_URL
+    label: NEXTAUTH_URL (builder URL)
+    description: Must match the builder host & scheme (e.g. https://typebot.example.com)
+    type: string
+    required: true
+    default: "https://typebot.example.com"
+    group: App URLs
+
+  - variable: typebot.NEXT_PUBLIC_VIEWER_URL
+    label: NEXT_PUBLIC_VIEWER_URL (viewer URL)
+    description: Must match the viewer host & scheme (e.g. https://bot.example.com)
+    type: string
+    required: true
+    default: "https://bot.example.com"
+    group: App URLs
+
+  # =====================
+  # General optionals
+  # =====================
+  - variable: features.admin.enabled
+    label: Set Admin email(s)
+    description: Toggle to set ADMIN_EMAIL (comma-separated)
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: typebot.ADMIN_EMAIL
+    label: ADMIN_EMAIL
+    description: Comma-separated list; leave blank to disable
+    type: string
+    required: false
+    default: ""
+    group: General
+    show_if: "features.admin.enabled=true"
+
+  - variable: typebot.DISABLE_SIGNUP
+    label: Disable signup
+    description: If checked, users cannot self-register
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: features.onboarding.enabled
+    label: Set onboarding Typebot ID
+    description: Toggle to set NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: typebot.NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID
+    label: NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID
+    description: Typebot ID to show in onboarding
+    type: string
+    required: false
+    default: ""
+    group: General
+    show_if: "features.onboarding.enabled=true"
+
+  - variable: typebot.DEBUG
+    label: Enable debug logging
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: features.upload.enabled
+    label: Set file upload max size (MB)
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: typebot.NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE
+    label: NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE
+    description: e.g. "10" for 10MB
+    type: string
+    required: false
+    default: ""
+    group: General
+    show_if: "features.upload.enabled=true"
+
+  - variable: features.chatTimeout.enabled
+    label: Set chat API timeout (ms)
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: typebot.CHAT_API_TIMEOUT
+    label: CHAT_API_TIMEOUT
+    description: e.g. "60000"
+    type: string
+    required: false
+    default: ""
+    group: General
+    show_if: "features.chatTimeout.enabled=true"
+
+  - variable: features.viewer404.enabled
+    label: Customize Viewer 404 texts
+    type: boolean
+    required: false
+    default: false
+    group: General
+
+  - variable: typebot.NEXT_PUBLIC_VIEWER_404_TITLE
+    label: NEXT_PUBLIC_VIEWER_404_TITLE
+    type: string
+    required: false
+    default: "404"
+    group: General
+    show_if: "features.viewer404.enabled=true"
+
+  - variable: typebot.NEXT_PUBLIC_VIEWER_404_SUBTITLE
+    label: NEXT_PUBLIC_VIEWER_404_SUBTITLE
+    type: string
+    required: false
+    default: "The bot you’re looking for doesn’t exist"
+    group: General
+    show_if: "features.viewer404.enabled=true"
+
+  # =====================
+  # SMTP / Email
+  # =====================
+  - variable: features.smtp.enabled
+    label: Configure SMTP (email)
+    type: boolean
+    required: false
+    default: false
+    group: Email / SMTP
+
+  - variable: typebot.SMTP_USERNAME
+    label: SMTP_USERNAME
+    type: string
+    required: false
+    default: ""
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.SMTP_PASSWORD
+    label: SMTP_PASSWORD
+    type: password
+    required: false
+    default: ""
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.SMTP_HOST
+    label: SMTP_HOST
+    type: string
+    required: false
+    default: ""
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.SMTP_PORT
+    label: SMTP_PORT
+    type: int
+    required: false
+    default: 25
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.NEXT_PUBLIC_SMTP_FROM
+    label: NEXT_PUBLIC_SMTP_FROM
+    description: '"Display Name" <[email protected]>'
+    type: string
+    required: false
+    default: ""
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.SMTP_SECURE
+    label: SMTP_SECURE (TLS)
+    type: boolean
+    required: false
+    default: false
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.SMTP_IGNORE_TLS
+    label: SMTP_IGNORE_TLS
+    description: If true, skip STARTTLS (will render "true"/"false")
+    type: boolean
+    required: false
+    default: false
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  - variable: typebot.SMTP_AUTH_DISABLED
+    label: SMTP_AUTH_DISABLED
+    type: boolean
+    required: false
+    default: false
+    group: Email / SMTP
+    show_if: "features.smtp.enabled=true"
+
+  # =====================
+  # OAuth providers
+  # =====================
+  - variable: features.oauth.github
+    label: Enable GitHub OAuth
+    type: boolean
+    required: false
+    default: false
+    group: OAuth
+
+  - variable: typebot.GITHUB_CLIENT_ID
+    label: GITHUB_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.github=true"
+
+  - variable: typebot.GITHUB_CLIENT_SECRET
+    label: GITHUB_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.github=true"
+
+  - variable: features.oauth.gitlab
+    label: Enable GitLab OAuth
+    type: boolean
+    required: false
+    default: false
+    group: OAuth
+
+  - variable: typebot.GITLAB_CLIENT_ID
+    label: GITLAB_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.gitlab=true"
+
+  - variable: typebot.GITLAB_CLIENT_SECRET
+    label: GITLAB_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.gitlab=true"
+
+  - variable: typebot.GITLAB_BASE_URL
+    label: GITLAB_BASE_URL
+    type: string
+    required: false
+    default: "https://gitlab.com"
+    group: OAuth
+    show_if: "features.oauth.gitlab=true"
+
+  - variable: typebot.GITLAB_REQUIRED_GROUPS
+    label: GITLAB_REQUIRED_GROUPS
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.gitlab=true"
+
+  - variable: typebot.GITLAB_NAME
+    label: GITLAB_NAME
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.gitlab=true"
+
+  - variable: features.oauth.facebook
+    label: Enable Facebook OAuth
+    type: boolean
+    required: false
+    default: false
+    group: OAuth
+
+  - variable: typebot.FACEBOOK_CLIENT_ID
+    label: FACEBOOK_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.facebook=true"
+
+  - variable: typebot.FACEBOOK_CLIENT_SECRET
+    label: FACEBOOK_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.facebook=true"
+
+  - variable: features.oauth.azure
+    label: Enable Azure AD OAuth
+    type: boolean
+    required: false
+    default: false
+    group: OAuth
+
+  - variable: typebot.AZURE_AD_CLIENT_ID
+    label: AZURE_AD_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.azure=true"
+
+  - variable: typebot.AZURE_AD_CLIENT_SECRET
+    label: AZURE_AD_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.azure=true"
+
+  - variable: typebot.AZURE_AD_TENANT_ID
+    label: AZURE_AD_TENANT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.azure=true"
+
+  - variable: features.oauth.keycloak
+    label: Enable Keycloak OAuth
+    type: boolean
+    required: false
+    default: false
+    group: OAuth
+
+  - variable: typebot.KEYCLOAK_CLIENT_ID
+    label: KEYCLOAK_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.keycloak=true"
+
+  - variable: typebot.KEYCLOAK_CLIENT_SECRET
+    label: KEYCLOAK_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.keycloak=true"
+
+  - variable: typebot.KEYCLOAK_REALM
+    label: KEYCLOAK_REALM
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.keycloak=true"
+
+  - variable: typebot.KEYCLOAK_BASE_URL
+    label: KEYCLOAK_BASE_URL
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.keycloak=true"
+
+  - variable: features.oauth.custom
+    label: Enable Custom OAuth (OIDC)
+    type: boolean
+    required: false
+    default: false
+    group: OAuth
+
+  - variable: typebot.CUSTOM_OAUTH_NAME
+    label: CUSTOM_OAUTH_NAME
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_CLIENT_ID
+    label: CUSTOM_OAUTH_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_CLIENT_SECRET
+    label: CUSTOM_OAUTH_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_ISSUER
+    label: CUSTOM_OAUTH_ISSUER
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_WELL_KNOWN_URL
+    label: CUSTOM_OAUTH_WELL_KNOWN_URL
+    type: string
+    required: false
+    default: ""
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_SCOPE
+    label: CUSTOM_OAUTH_SCOPE
+    type: string
+    required: false
+    default: "openid profile email"
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_USER_ID_PATH
+    label: CUSTOM_OAUTH_USER_ID_PATH
+    type: string
+    required: false
+    default: "id"
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_USER_NAME_PATH
+    label: CUSTOM_OAUTH_USER_NAME_PATH
+    type: string
+    required: false
+    default: "name"
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_USER_EMAIL_PATH
+    label: CUSTOM_OAUTH_USER_EMAIL_PATH
+    type: string
+    required: false
+    default: "email"
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  - variable: typebot.CUSTOM_OAUTH_USER_IMAGE_PATH
+    label: CUSTOM_OAUTH_USER_IMAGE_PATH
+    type: string
+    required: false
+    default: "image"
+    group: OAuth
+    show_if: "features.oauth.custom=true"
+
+  # =====================
+  # Google integrations
+  # =====================
+  - variable: features.googleAuth.enabled
+    label: Enable Google Auth
+    type: boolean
+    required: false
+    default: false
+    group: Google
+
+  - variable: typebot.GOOGLE_AUTH_CLIENT_ID
+    label: GOOGLE_AUTH_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.googleAuth.enabled=true"
+
+  - variable: typebot.GOOGLE_AUTH_CLIENT_SECRET
+    label: GOOGLE_AUTH_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.googleAuth.enabled=true"
+
+  - variable: features.googleSheets.enabled
+    label: Enable Google Sheets
+    type: boolean
+    required: false
+    default: false
+    group: Google
+
+  - variable: typebot.GOOGLE_SHEETS_CLIENT_ID
+    label: GOOGLE_SHEETS_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.googleSheets.enabled=true"
+
+  - variable: typebot.GOOGLE_SHEETS_CLIENT_SECRET
+    label: GOOGLE_SHEETS_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.googleSheets.enabled=true"
+
+  - variable: typebot.NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY
+    label: NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY
+    type: string
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.googleSheets.enabled=true"
+
+  - variable: features.gmail.enabled
+    label: Enable Gmail API
+    type: boolean
+    required: false
+    default: false
+    group: Google
+
+  - variable: typebot.GMAIL_CLIENT_ID
+    label: GMAIL_CLIENT_ID
+    type: string
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.gmail.enabled=true"
+
+  - variable: typebot.GMAIL_CLIENT_SECRET
+    label: GMAIL_CLIENT_SECRET
+    type: password
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.gmail.enabled=true"
+
+  - variable: features.googleFonts.enabled
+    label: Enable Google Fonts API
+    type: boolean
+    required: false
+    default: false
+    group: Google
+
+  - variable: typebot.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY
+    label: NEXT_PUBLIC_GOOGLE_FONTS_API_KEY
+    type: string
+    required: false
+    default: ""
+    group: Google
+    show_if: "features.googleFonts.enabled=true"
+
+  # =====================
+  # Storage (S3)
+  # =====================
+  - variable: features.s3.enabled
+    label: Enable S3 storage (uploads)
+    type: boolean
+    required: false
+    default: false
+    group: Storage (S3)
+
+  - variable: typebot.S3_ACCESS_KEY
+    label: S3_ACCESS_KEY
+    type: string
+    required: false
+    default: ""
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_SECRET_KEY
+    label: S3_SECRET_KEY
+    type: password
+    required: false
+    default: ""
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_BUCKET
+    label: S3_BUCKET
+    type: string
+    required: false
+    default: "typebot"
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_ENDPOINT
+    label: S3_ENDPOINT (URL or host)
+    type: string
+    required: false
+    default: ""
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_PORT
+    label: S3_PORT
+    type: string
+    required: false
+    default: ""
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_REGION
+    label: S3_REGION
+    type: string
+    required: false
+    default: ""
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_SSL
+    label: S3_SSL
+    type: boolean
+    required: false
+    default: true
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  - variable: typebot.S3_PUBLIC_CUSTOM_DOMAIN
+    label: S3_PUBLIC_CUSTOM_DOMAIN (URL)
+    type: string
+    required: false
+    default: ""
+    group: Storage (S3)
+    show_if: "features.s3.enabled=true"
+
+  # =====================
+  # Media APIs
+  # =====================
+  - variable: features.giphy.enabled
+    label: Enable Giphy
+    type: boolean
+    required: false
+    default: false
+    group: Media APIs
+
+  - variable: typebot.NEXT_PUBLIC_GIPHY_API_KEY
+    label: NEXT_PUBLIC_GIPHY_API_KEY
+    type: string
+    required: false
+    default: ""
+    group: Media APIs
+    show_if: "features.giphy.enabled=true"
+
+  - variable: features.unsplash.enabled
+    label: Enable Unsplash
+    type: boolean
+    required: false
+    default: false
+    group: Media APIs
+
+  - variable: typebot.NEXT_PUBLIC_UNSPLASH_APP_NAME
+    label: NEXT_PUBLIC_UNSPLASH_APP_NAME
+    type: string
+    required: false
+    default: ""
+    group: Media APIs
+    show_if: "features.unsplash.enabled=true"
+
+  - variable: typebot.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY
+    label: NEXT_PUBLIC_UNSPLASH_ACCESS_KEY
+    type: string
+    required: false
+    default: ""
+    group: Media APIs
+    show_if: "features.unsplash.enabled=true"
+
+  - variable: features.pexels.enabled
+    label: Enable Pexels
+    type: boolean
+    required: false
+    default: false
+    group: Media APIs
+
+  - variable: typebot.NEXT_PUBLIC_PEXELS_API_KEY
+    label: NEXT_PUBLIC_PEXELS_API_KEY
+    type: string
+    required: false
+    default: ""
+    group: Media APIs
+    show_if: "features.pexels.enabled=true"
+
+  # =====================
+  # Tolgee (i18n)
+  # =====================
+  - variable: features.tolgee.enabled
+    label: Enable Tolgee (i18n dev tool)
+    type: boolean
+    required: false
+    default: false
+    group: Tolgee
+
+  - variable: typebot.NEXT_PUBLIC_TOLGEE_API_KEY
+    label: NEXT_PUBLIC_TOLGEE_API_KEY
+    type: string
+    required: false
+    default: ""
+    group: Tolgee
+    show_if: "features.tolgee.enabled=true"
+
+  - variable: typebot.NEXT_PUBLIC_TOLGEE_API_URL
+    label: NEXT_PUBLIC_TOLGEE_API_URL
+    type: string
+    required: false
+    default: "https://tolgee.server.baptistearno.com"
+    group: Tolgee
+    show_if: "features.tolgee.enabled=true"
+
+  # =====================
+  # WhatsApp (Preview)
+  # =====================
+  - variable: features.whatsapp.enabled
+    label: Enable WhatsApp Preview
+    type: boolean
+    required: false
+    default: false
+    group: WhatsApp (Preview)
+
+  - variable: typebot.META_SYSTEM_USER_TOKEN
+    label: META_SYSTEM_USER_TOKEN
+    type: password
+    required: false
+    default: ""
+    group: WhatsApp (Preview)
+    show_if: "features.whatsapp.enabled=true"
+
+  - variable: typebot.WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID
+    label: WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID
+    type: string
+    required: false
+    default: ""
+    group: WhatsApp (Preview)
+    show_if: "features.whatsapp.enabled=true"
+
+  - variable: typebot.WHATSAPP_PREVIEW_TEMPLATE_NAME
+    label: WHATSAPP_PREVIEW_TEMPLATE_NAME
+    type: string
+    required: false
+    default: ""
+    group: WhatsApp (Preview)
+    show_if: "features.whatsapp.enabled=true"
+
+  - variable: typebot.WHATSAPP_PREVIEW_TEMPLATE_LANG
+    label: WHATSAPP_PREVIEW_TEMPLATE_LANG
+    type: string
+    required: false
+    default: "en_US"
+    group: WhatsApp (Preview)
+    show_if: "features.whatsapp.enabled=true"
+
+  - variable: typebot.WHATSAPP_CLOUD_API_URL
+    label: WHATSAPP_CLOUD_API_URL
+    type: string
+    required: false
+    default: "https://graph.facebook.com"
+    group: WhatsApp (Preview)
+    show_if: "features.whatsapp.enabled=true"
+
+  - variable: typebot.WHATSAPP_INTERACTIVE_GROUP_SIZE
+    label: WHATSAPP_INTERACTIVE_GROUP_SIZE
+    type: int
+    required: false
+    default: 3
+    group: WhatsApp (Preview)
+    show_if: "features.whatsapp.enabled=true"
+
+  # =====================
+  # Analytics / Telemetry / Vercel
+  # =====================
+  - variable: features.posthog.enabled
+    label: Enable PostHog analytics
+    type: boolean
+    required: false
+    default: false
+    group: Analytics & Telemetry
+
+  - variable: typebot.NEXT_PUBLIC_POSTHOG_KEY
+    label: NEXT_PUBLIC_POSTHOG_KEY
+    type: string
+    required: false
+    default: ""
+    group: Analytics & Telemetry
+    show_if: "features.posthog.enabled=true"
+
+  - variable: typebot.POSTHOG_API_HOST
+    label: POSTHOG_API_HOST
+    type: string
+    required: false
+    default: "https://eu.posthog.com"
+    group: Analytics & Telemetry
+    show_if: "features.posthog.enabled=true"
+
+  - variable: typebot.POSTHOG_PERSONAL_API_KEY
+    label: POSTHOG_PERSONAL_API_KEY
+    type: password
+    required: false
+    default: ""
+    group: Analytics & Telemetry
+    show_if: "features.posthog.enabled=true"
+
+  - variable: typebot.POSTHOG_PROJECT_ID
+    label: POSTHOG_PROJECT_ID
+    type: string
+    required: false
+    default: ""
+    group: Analytics & Telemetry
+    show_if: "features.posthog.enabled=true"
+
+  - variable: features.vercel.enabled
+    label: Enable Vercel integration
+    type: boolean
+    required: false
+    default: false
+    group: Analytics & Telemetry
+
+  - variable: typebot.VERCEL_TOKEN
+    label: VERCEL_TOKEN
+    type: password
+    required: false
+    default: ""
+    group: Analytics & Telemetry
+    show_if: "features.vercel.enabled=true"
+
+  - variable: typebot.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME
+    label: NEXT_PUBLIC_VERCEL_VIEWER_VIEWER_PROJECT_NAME
+    type: string
+    required: false
+    default: ""
+    group: Analytics & Telemetry
+    show_if: "features.vercel.enabled=true"
+
+  - variable: typebot.VERCEL_TEAM_ID
+    label: VERCEL_TEAM_ID
+    type: string
+    required: false
+    default: ""
+    group: Analytics & Telemetry
+    show_if: "features.vercel.enabled=true"
+
+  # =====================
+  # Webhooks / PartyKit
+  # =====================
+  - variable: features.webhooks.enabled
+    label: Enable webhooks
+    type: boolean
+    required: false
+    default: false
+    group: Webhooks & Other
+
+  - variable: typebot.MESSAGE_WEBHOOK_URL
+    label: MESSAGE_WEBHOOK_URL
+    type: string
+    required: false
+    default: ""
+    group: Webhooks & Other
+    show_if: "features.webhooks.enabled=true"
+
+  - variable: typebot.USER_CREATED_WEBHOOK_URL
+    label: USER_CREATED_WEBHOOK_URL
+    type: string
+    required: false
+    default: ""
+    group: Webhooks & Other
+    show_if: "features.webhooks.enabled=true"
+
+  - variable: features.partykit.enabled
+    label: Enable PartyKit (webhook block)
+    type: boolean
+    required: false
+    default: false
+    group: Webhooks & Other
+
+  - variable: typebot.NEXT_PUBLIC_PARTYKIT_HOST
+    label: NEXT_PUBLIC_PARTYKIT_HOST
+    type: string
+    required: false
+    default: ""
+    group: Webhooks & Other
+    show_if: "features.partykit.enabled=true"
+
+  # =====================
+  # Redis override (optional)
+  # =====================
+  - variable: features.redis.override
+    label: Override internal Redis URL
+    description: Provide REDIS_URL (only if using external Redis)
+    type: boolean
+    required: false
+    default: false
+    group: Advanced
+
+  - variable: typebot.REDIS_URL
+    label: REDIS_URL
+    description: e.g. redis://user:pass@host:6379/0
+    type: string
+    required: false
+    default: ""
+    group: Advanced
+    show_if: "features.redis.override=true"

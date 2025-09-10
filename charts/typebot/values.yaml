@@ -213,3 +213,34 @@ typebot_redis:
   resources: {}
   nodeSelector: {}
   serviceAccount: ""
+
+ingress:
+  builder:
+    enabled: false
+    className: ""          # e.g. "nginx" or "traefik"
+    annotations: {}        # controller-specific annotations
+    host: "typebot.example.com"
+    path: "/"
+    service:
+      nameOverride: ""     # defaults to "<fullname>-typebot"
+      port: 80
+    tls:
+      enabled: true
+      source: cert-manager # "cert-manager" | "secret"
+      clusterIssuer: "letsencrypt"
+      secretName: ""       # default "<fullname>-builder-tls" if empty
+
+  viewer:
+    enabled: true
+    className: ""          # can be different from builder if you want
+    annotations: {}
+    host: "bot.example.com"
+    path: "/"
+    service:
+      nameOverride: ""     # defaults to "<fullname>-viewer"
+      port: 80
+    tls:
+      enabled: true
+      source: cert-manager
+      clusterIssuer: "letsencrypt"
+      secretName: ""       # default "<fullname>-viewer-tls" if empty
