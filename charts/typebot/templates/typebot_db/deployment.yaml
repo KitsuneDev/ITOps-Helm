@@ -41,6 +41,7 @@ spec:
         {{- if .Values.typebot_db.persistence.db_data.enabled }}
         - mountPath: /var/lib/postgresql/data
           name: db-data
+          subPath: pgdata
         {{- end }}
       {{- if .Values.pullSecrets }}
       imagePullSecrets:
