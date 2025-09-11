@@ -74,6 +74,15 @@ entries:
   typebotio:
   - apiVersion: v2
     appVersion: 0.1.0
+    created: "2025-09-11T15:51:00.388896069Z"
+    description: Typebot for Helm
+    digest: 7017b1e7a41529f7954739989b3acc7c65c675d4023e264029168dd52f30c7b1
+    name: typebotio
+    urls:
+    - https://github.com/KitsuneDev/ITOps-Helm/releases/download/typebotio-0.1.4/typebotio-0.1.4.tgz
+    version: 0.1.4
+  - apiVersion: v2
+    appVersion: 0.1.0
     created: "2025-09-11T15:19:36.855160237Z"
     description: Typebot for Helm
     digest: 6be35e21dcf6152347a52e97ed523194c3fa3d17fe7ca9e8d1f9419363cb8048
@@ -108,4 +117,4 @@ entries:
     urls:
     - https://github.com/KitsuneDev/ITOps-Helm/releases/download/typebotio-0.1.0/typebotio-0.1.0.tgz
     version: 0.1.0
-generated: "2025-09-11T15:19:36.855189792Z"
+generated: "2025-09-11T15:51:00.388964097Z"
