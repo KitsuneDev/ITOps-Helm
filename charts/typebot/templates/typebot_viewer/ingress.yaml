@@ -7,7 +7,7 @@
 {{- if and $v.tls.enabled (eq $v.tls.source "cert-manager") -}}
 {{- $_ := set $ann "cert-manager.io/cluster-issuer" ($v.tls.clusterIssuer | default "letsencrypt") -}}
 {{- end -}}
-{{- $svcName := default (printf "%s-viewer" $fullname) $v.service.nameOverride -}}
+{{- $svcName := default (printf "%s-typebot-viewer" $fullname) $v.service.nameOverride -}}
 {{- $tlsSecret := default (printf "%s-viewer-tls" $fullname) $v.tls.secretName -}}
 
 apiVersion: networking.k8s.io/v1
