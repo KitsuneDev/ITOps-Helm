@@ -1,19 +1,188 @@
-﻿# local.values.yaml
+﻿ingress:
+  builder:
+    annotations: {}
+    className: traefik
+    enabled: true
+    host: botadm.engemonit.com.br
+    path: /
+    service:
+      nameOverride: ''
+      port: 3000
+    tls:
+      clusterIssuer: le-external
+      enabled: true
+      secretName: ''
+      source: cert-manager
+  viewer:
+    annotations: {}
+    className: traefik
+    enabled: true
+    host: bot.engemonit.com.br
+    path: /
+    service:
+      nameOverride: ''
+      port: 3000
+    tls:
+      clusterIssuer: le-external
+      enabled: true
+      secretName: ''
+      source: cert-manager
 typebot:
-  NEXTAUTH_URL: "http://localhost:3000"          # builder
-  NEXT_PUBLIC_VIEWER_URL: "http://localhost:3001" # viewer
-  #ENCRYPTION_SECRET: "dev-32bytes-min-change-me-1234567890abcd"
-
+  ENCRYPTION_SECRET: null
+  NEXTAUTH_URL: https://botadm.engemonit.com.br
+  NEXT_PUBLIC_VIEWER_URL: https://bot.engemonit.com.br
+  ADMIN_EMAIL: gabriel.rocha@engemonit.com.br
+  CUSTOM_OAUTH_CLIENT_ID: D5va7tyOf5AgR2xOYisDsy2nQPlm0As2JiOp7M0O
+  CUSTOM_OAUTH_CLIENT_SECRET: >-
+    HLXstUlN2ixsu7ohTPsTM8vTMQMJ2uK55JIAYfvfi1LP9bSYbIicFtCc2uFqV0qbSK8Ha8TBAgFsuw0yizd1uuSneATtBBcwOZDcUp3LC7ouzKILlOumgYFtGa96UqBH
+  CUSTOM_OAUTH_ISSUER: https://id.engemonit.com.br/application/o/typebot/
+  CUSTOM_OAUTH_NAME: EngemonID
+  CUSTOM_OAUTH_SCOPE: openid profile email
+  CUSTOM_OAUTH_USER_EMAIL_PATH: email
+  CUSTOM_OAUTH_USER_ID_PATH: id
+  CUSTOM_OAUTH_USER_IMAGE_PATH: image
+  CUSTOM_OAUTH_USER_NAME_PATH: name
+  CUSTOM_OAUTH_WELL_KNOWN_URL: >-
+    https://id.engemonit.com.br/application/o/typebot/.well-known/openid-configuration
+  DEBUG: false
+  DISABLE_SIGNUP: true
+  META_SYSTEM_USER_TOKEN: ''
+  NEXT_PUBLIC_PARTYKIT_HOST: ''
+  NEXT_PUBLIC_SMTP_FROM: ''
+  SMTP_AUTH_DISABLED: false
+  SMTP_HOST: ''
+  SMTP_IGNORE_TLS: false
+  SMTP_PASSWORD: ''
+  SMTP_PORT: 25
+  SMTP_SECURE: false
+  SMTP_USERNAME: ''
+  WHATSAPP_CLOUD_API_URL: https://graph.facebook.com
+  WHATSAPP_INTERACTIVE_GROUP_SIZE: 3
+  WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID: ''
+  WHATSAPP_PREVIEW_TEMPLATE_LANG: en_US
+  WHATSAPP_PREVIEW_TEMPLATE_NAME: ''
+typebot_builder:
+  imagePullPolicy: IfNotPresent
+  nodeSelector: {}
+  replicas: 1
+  repository:
+    image: baptistearno/typebot-builder
+    tag: latest
+  resources: {}
+  serviceAccount: ''
 typebot_db:
+  auth:
+    database: typebot
+    password: typebot
+    user: postgres
   enabled: true
+  imagePullPolicy: IfNotPresent
+  nodeSelector: {}
   persistence:
     db_data:
-      enabled: false        # flip to true later if you want PVCs
-
+      accessMode:
+        - ReadWriteOnce
+      enabled: true
+      size: 10Gi
+      storageClass: longhorn
+  replicas: 1
+  repository:
+    image: postgres
+    tag: 16-alpine
+  resources: {}
+  service:
+    nameOverride: ''
+    port: 5432
+    type: ClusterIP
+  serviceAccount: ''
 typebot_redis:
-  enabled: true
   auth:
     enabled: false
+    password: ''
+  enabled: true
+  imagePullPolicy: IfNotPresent
+  nodeSelector: {}
   persistence:
     redis_data:
-      enabled: false        # flip to true later if you want PVCs
+      accessMode:
+        - ReadWriteOnce
+      enabled: true
+      size: 2Gi
+      storageClass: longhorn
+  replicas: 1
+  repository:
+    image: redis
+    tag: 7-alpine
+  resources: {}
+  service:
+    nameOverride: ''
+    port: 6379
+    type: ClusterIP
+  serviceAccount: ''
+typebot_viewer:
+  imagePullPolicy: IfNotPresent
+  nodeSelector: {}
+  replicas: 1
+  repository:
+    image: baptistearno/typebot-viewer
+    tag: latest
+  resources: {}
+  serviceAccount: ''
+features:
+  admin:
+    enabled: true
+  chatTimeout:
+    enabled: false
+  giphy:
+    enabled: false
+  gmail:
+    enabled: false
+  googleAuth:
+    enabled: false
+  googleFonts:
+    enabled: false
+  googleSheets:
+    enabled: false
+  oauth:
+    azure: false
+    custom: true
+    facebook: false
+    github: false
+    gitlab: false
+    keycloak: false
+  onboarding:
+    enabled: false
+  partykit:
+    enabled: false
+  pexels:
+    enabled: false
+  posthog:
+    enabled: false
+  redis:
+    override: false
+  s3:
+    enabled: false
+  smtp:
+    enabled: false
+  tolgee:
+    enabled: false
+  unsplash:
+    enabled: false
+  upload:
+    enabled: false
+  vercel:
+    enabled: false
+  viewer404:
+    enabled: false
+  webhooks:
+    enabled: false
+  whatsapp:
+    enabled: false
+global:
+  cattle:
+    clusterId: local
+    clusterName: local
+    rkePathPrefix: ''
+    rkeWindowsPathPrefix: ''
+    systemProjectId: p-zvkgf
+    url: https://k8s.engemonit.com.br

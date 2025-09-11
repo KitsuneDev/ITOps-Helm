@@ -34,7 +34,7 @@ spec:
               service:
                 name: {{ $svcName }}
                 port:
-                  number: {{ $v.service.port | default 80 }}
+                  number: {{ $v.service.port | default 3000 }}
   {{- if $v.tls.enabled }}
   tls:
     - hosts:

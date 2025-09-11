@@ -1,4 +1,3 @@
-# templates/typebot-configmap.yaml
 apiVersion: v1
 kind: ConfigMap
 metadata:
@@ -6,106 +5,288 @@ metadata:
   labels:
     {{- include "typebotio.labels" . | nindent 4 }}
 data:
-  # --- General optionals (emit only when provided) ---
-  {{- with .Values.typebot.ADMIN_EMAIL }}
-  ADMIN_EMAIL: {{ . | quote }}
+  {{- $t := .Values.typebot }}
+
+  # --- General optionals ---
+  {{- if and (hasKey $t "ADMIN_EMAIL") (ne (trim ($t.ADMIN_EMAIL | toString)) "") }}
+  ADMIN_EMAIL: {{ $t.ADMIN_EMAIL | quote }}
   {{- end }}
-  {{- with .Values.typebot.DEFAULT_WORKSPACE_PLAN }}
-  DEFAULT_WORKSPACE_PLAN: {{ . | quote }}
+  {{- if and (hasKey $t "DEFAULT_WORKSPACE_PLAN") (ne (trim ($t.DEFAULT_WORKSPACE_PLAN | toString)) "") }}
+  DEFAULT_WORKSPACE_PLAN: {{ $t.DEFAULT_WORKSPACE_PLAN | quote }}
   {{- end }}
-  {{- with .Values.typebot.DISABLE_SIGNUP }}
-  DISABLE_SIGNUP: {{ ternary "true" "false" . | quote }}
+  {{- if hasKey $t "DISABLE_SIGNUP" }}
+  DISABLE_SIGNUP: {{ ternary "true" "false" $t.DISABLE_SIGNUP | quote }}
   {{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID }}
-  NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID: {{ . | quote }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID") (ne (trim ($t.NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID | toString)) "") }}
+  NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID: {{ $t.NEXT_PUBLIC_ONBOARDING_TYPEBOT_ID | quote }}
   {{- end }}
-  {{- with .Values.typebot.DEBUG }}
-  DEBUG: {{ ternary "true" "false" . | quote }}
+  {{- if hasKey $t "DEBUG" }}
+  DEBUG: {{ ternary "true" "false" $t.DEBUG | quote }}
   {{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE }}
-  NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE: {{ . | quote }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE") (ne (trim ($t.NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE | toString)) "") }}
+  NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE: {{ $t.NEXT_PUBLIC_BOT_FILE_UPLOAD_MAX_SIZE | quote }}
   {{- end }}
-  {{- with .Values.typebot.CHAT_API_TIMEOUT }}
-  CHAT_API_TIMEOUT: {{ . | quote }}
+  {{- if and (hasKey $t "CHAT_API_TIMEOUT") (ne (trim ($t.CHAT_API_TIMEOUT | toString)) "") }}
+  CHAT_API_TIMEOUT: {{ $t.CHAT_API_TIMEOUT | quote }}
   {{- end }}
 
-  # --- SMTP (emit only if you’re using email) ---
-  {{- with .Values.typebot.SMTP_USERNAME }}SMTP_USERNAME: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.SMTP_PASSWORD }}SMTP_PASSWORD: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.SMTP_HOST }}SMTP_HOST: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.SMTP_PORT }}SMTP_PORT: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_SMTP_FROM }}NEXT_PUBLIC_SMTP_FROM: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.SMTP_SECURE }}SMTP_SECURE: {{ ternary "true" "false" . | quote }}{{- end }}
-  # this one expects the literal strings "true" | "false"
-  {{- with .Values.typebot.SMTP_IGNORE_TLS }}SMTP_IGNORE_TLS: {{ ternary "true" "false" . | quote }}{{- end }}
-  {{- with .Values.typebot.SMTP_AUTH_DISABLED }}SMTP_AUTH_DISABLED: {{ ternary "true" "false" . | quote }}{{- end }}
+  # --- SMTP / Email ---
+  {{- if and (hasKey $t "SMTP_USERNAME") (ne (trim ($t.SMTP_USERNAME | toString)) "") }}
+  SMTP_USERNAME: {{ $t.SMTP_USERNAME | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "SMTP_PASSWORD") (ne (trim ($t.SMTP_PASSWORD | toString)) "") }}
+  SMTP_PASSWORD: {{ $t.SMTP_PASSWORD | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "SMTP_HOST") (ne (trim ($t.SMTP_HOST | toString)) "") }}
+  SMTP_HOST: {{ $t.SMTP_HOST | quote }}
+  {{- end }}
+  {{- if hasKey $t "SMTP_PORT" }}
+  SMTP_PORT: {{ $t.SMTP_PORT | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_SMTP_FROM") (ne (trim ($t.NEXT_PUBLIC_SMTP_FROM | toString)) "") }}
+  NEXT_PUBLIC_SMTP_FROM: {{ $t.NEXT_PUBLIC_SMTP_FROM | quote }}
+  {{- end }}
+  {{- if hasKey $t "SMTP_SECURE" }}
+  SMTP_SECURE: {{ ternary "true" "false" $t.SMTP_SECURE | quote }}
+  {{- end }}
+  {{- if hasKey $t "SMTP_IGNORE_TLS" }}
+  SMTP_IGNORE_TLS: {{ ternary "true" "false" $t.SMTP_IGNORE_TLS | quote }}
+  {{- end }}
+  {{- if hasKey $t "SMTP_AUTH_DISABLED" }}
+  SMTP_AUTH_DISABLED: {{ ternary "true" "false" $t.SMTP_AUTH_DISABLED | quote }}
+  {{- end }}
 
-  # --- OAuth providers (only emit when configured) ---
-  {{- with .Values.typebot.GITHUB_CLIENT_ID }}GITHUB_CLIENT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.GITHUB_CLIENT_SECRET }}GITHUB_CLIENT_SECRET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.GITLAB_CLIENT_ID }}GITLAB_CLIENT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.GITLAB_CLIENT_SECRET }}GITLAB_CLIENT_SECRET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.GITLAB_BASE_URL }}GITLAB_BASE_URL: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.GITLAB_REQUIRED_GROUPS }}GITLAB_REQUIRED_GROUPS: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.GITLAB_NAME }}GITLAB_NAME: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.FACEBOOK_CLIENT_ID }}FACEBOOK_CLIENT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.FACEBOOK_CLIENT_SECRET }}FACEBOOK_CLIENT_SECRET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.AZURE_AD_CLIENT_ID }}AZURE_AD_CLIENT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.AZURE_AD_CLIENT_SECRET }}AZURE_AD_CLIENT_SECRET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.AZURE_AD_TENANT_ID }}AZURE_AD_TENANT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.KEYCLOAK_CLIENT_ID }}KEYCLOAK_CLIENT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.KEYCLOAK_CLIENT_SECRET }}KEYCLOAK_CLIENT_SECRET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.KEYCLOAK_REALM }}KEYCLOAK_REALM: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.KEYCLOAK_BASE_URL }}KEYCLOAK_BASE_URL: {{ . | quote }}{{- end }}
+  # --- OAuth providers ---
+  # GitHub
+  {{- if and (hasKey $t "GITHUB_CLIENT_ID") (ne (trim ($t.GITHUB_CLIENT_ID | toString)) "") }}
+  GITHUB_CLIENT_ID: {{ $t.GITHUB_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GITHUB_CLIENT_SECRET") (ne (trim ($t.GITHUB_CLIENT_SECRET | toString)) "") }}
+  GITHUB_CLIENT_SECRET: {{ $t.GITHUB_CLIENT_SECRET | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.CUSTOM_OAUTH_CLIENT_ID }}CUSTOM_OAUTH_CLIENT_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_CLIENT_SECRET }}CUSTOM_OAUTH_CLIENT_SECRET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_ISSUER }}CUSTOM_OAUTH_ISSUER: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_NAME }}CUSTOM_OAUTH_NAME: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_WELL_KNOWN_URL }}CUSTOM_OAUTH_WELL_KNOWN_URL: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_USER_ID_PATH }}CUSTOM_OAUTH_USER_ID_PATH: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_USER_NAME_PATH }}CUSTOM_OAUTH_USER_NAME_PATH: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_USER_EMAIL_PATH }}CUSTOM_OAUTH_USER_EMAIL_PATH: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_USER_IMAGE_PATH }}CUSTOM_OAUTH_USER_IMAGE_PATH: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.CUSTOM_OAUTH_SCOPE }}CUSTOM_OAUTH_SCOPE: {{ . | quote }}{{- end }}
+  # GitLab
+  {{- if and (hasKey $t "GITLAB_CLIENT_ID") (ne (trim ($t.GITLAB_CLIENT_ID | toString)) "") }}
+  GITLAB_CLIENT_ID: {{ $t.GITLAB_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GITLAB_CLIENT_SECRET") (ne (trim ($t.GITLAB_CLIENT_SECRET | toString)) "") }}
+  GITLAB_CLIENT_SECRET: {{ $t.GITLAB_CLIENT_SECRET | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GITLAB_BASE_URL") (ne (trim ($t.GITLAB_BASE_URL | toString)) "") }}
+  GITLAB_BASE_URL: {{ $t.GITLAB_BASE_URL | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GITLAB_REQUIRED_GROUPS") (ne (trim ($t.GITLAB_REQUIRED_GROUPS | toString)) "") }}
+  GITLAB_REQUIRED_GROUPS: {{ $t.GITLAB_REQUIRED_GROUPS | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GITLAB_NAME") (ne (trim ($t.GITLAB_NAME | toString)) "") }}
+  GITLAB_NAME: {{ $t.GITLAB_NAME | quote }}
+  {{- end }}
 
-  # --- S3 / External services (emit only when provided; avoids “Invalid url”) ---
-  {{- with .Values.typebot.S3_ACCESS_KEY }}S3_ACCESS_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_SECRET_KEY }}S3_SECRET_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_BUCKET }}S3_BUCKET: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_PORT }}S3_PORT: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_ENDPOINT }}S3_ENDPOINT: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_SSL }}S3_SSL: {{ ternary "true" "false" . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_REGION }}S3_REGION: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.S3_PUBLIC_CUSTOM_DOMAIN }}S3_PUBLIC_CUSTOM_DOMAIN: {{ . | quote }}{{- end }}
+  # Facebook
+  {{- if and (hasKey $t "FACEBOOK_CLIENT_ID") (ne (trim ($t.FACEBOOK_CLIENT_ID | toString)) "") }}
+  FACEBOOK_CLIENT_ID: {{ $t.FACEBOOK_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "FACEBOOK_CLIENT_SECRET") (ne (trim ($t.FACEBOOK_CLIENT_SECRET | toString)) "") }}
+  FACEBOOK_CLIENT_SECRET: {{ $t.FACEBOOK_CLIENT_SECRET | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.NEXT_PUBLIC_GIPHY_API_KEY }}NEXT_PUBLIC_GIPHY_API_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_UNSPLASH_APP_NAME }}NEXT_PUBLIC_UNSPLASH_APP_NAME: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY }}NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_PEXELS_API_KEY }}NEXT_PUBLIC_PEXELS_API_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY }}NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY }}NEXT_PUBLIC_GOOGLE_FONTS_API_KEY: {{ . | quote }}{{- end }}
+  # Azure AD
+  {{- if and (hasKey $t "AZURE_AD_CLIENT_ID") (ne (trim ($t.AZURE_AD_CLIENT_ID | toString)) "") }}
+  AZURE_AD_CLIENT_ID: {{ $t.AZURE_AD_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "AZURE_AD_CLIENT_SECRET") (ne (trim ($t.AZURE_AD_CLIENT_SECRET | toString)) "") }}
+  AZURE_AD_CLIENT_SECRET: {{ $t.AZURE_AD_CLIENT_SECRET | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "AZURE_AD_TENANT_ID") (ne (trim ($t.AZURE_AD_TENANT_ID | toString)) "") }}
+  AZURE_AD_TENANT_ID: {{ $t.AZURE_AD_TENANT_ID | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.NEXT_PUBLIC_TOLGEE_API_KEY }}NEXT_PUBLIC_TOLGEE_API_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_TOLGEE_API_URL }}NEXT_PUBLIC_TOLGEE_API_URL: {{ . | quote }}{{- end }}
+  # Keycloak
+  {{- if and (hasKey $t "KEYCLOAK_CLIENT_ID") (ne (trim ($t.KEYCLOAK_CLIENT_ID | toString)) "") }}
+  KEYCLOAK_CLIENT_ID: {{ $t.KEYCLOAK_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "KEYCLOAK_CLIENT_SECRET") (ne (trim ($t.KEYCLOAK_CLIENT_SECRET | toString)) "") }}
+  KEYCLOAK_CLIENT_SECRET: {{ $t.KEYCLOAK_CLIENT_SECRET | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "KEYCLOAK_REALM") (ne (trim ($t.KEYCLOAK_REALM | toString)) "") }}
+  KEYCLOAK_REALM: {{ $t.KEYCLOAK_REALM | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "KEYCLOAK_BASE_URL") (ne (trim ($t.KEYCLOAK_BASE_URL | toString)) "") }}
+  KEYCLOAK_BASE_URL: {{ $t.KEYCLOAK_BASE_URL | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.MESSAGE_WEBHOOK_URL }}MESSAGE_WEBHOOK_URL: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.USER_CREATED_WEBHOOK_URL }}USER_CREATED_WEBHOOK_URL: {{ . | quote }}{{- end }}
+  # Custom OAuth (OIDC)
+  {{- if and (hasKey $t "CUSTOM_OAUTH_CLIENT_ID") (ne (trim ($t.CUSTOM_OAUTH_CLIENT_ID | toString)) "") }}
+  CUSTOM_OAUTH_CLIENT_ID: {{ $t.CUSTOM_OAUTH_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_CLIENT_SECRET") (ne (trim ($t.CUSTOM_OAUTH_CLIENT_SECRET | toString)) "") }}
+  CUSTOM_OAUTH_CLIENT_SECRET: {{ $t.CUSTOM_OAUTH_CLIENT_SECRET | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_ISSUER") (ne (trim ($t.CUSTOM_OAUTH_ISSUER | toString)) "") }}
+  CUSTOM_OAUTH_ISSUER: {{ $t.CUSTOM_OAUTH_ISSUER | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_NAME") (ne (trim ($t.CUSTOM_OAUTH_NAME | toString)) "") }}
+  CUSTOM_OAUTH_NAME: {{ $t.CUSTOM_OAUTH_NAME | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_WELL_KNOWN_URL") (ne (trim ($t.CUSTOM_OAUTH_WELL_KNOWN_URL | toString)) "") }}
+  CUSTOM_OAUTH_WELL_KNOWN_URL: {{ $t.CUSTOM_OAUTH_WELL_KNOWN_URL | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_SCOPE") (ne (trim ($t.CUSTOM_OAUTH_SCOPE | toString)) "") }}
+  CUSTOM_OAUTH_SCOPE: {{ $t.CUSTOM_OAUTH_SCOPE | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_USER_ID_PATH") (ne (trim ($t.CUSTOM_OAUTH_USER_ID_PATH | toString)) "") }}
+  CUSTOM_OAUTH_USER_ID_PATH: {{ $t.CUSTOM_OAUTH_USER_ID_PATH | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_USER_NAME_PATH") (ne (trim ($t.CUSTOM_OAUTH_USER_NAME_PATH | toString)) "") }}
+  CUSTOM_OAUTH_USER_NAME_PATH: {{ $t.CUSTOM_OAUTH_USER_NAME_PATH | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_USER_EMAIL_PATH") (ne (trim ($t.CUSTOM_OAUTH_USER_EMAIL_PATH | toString)) "") }}
+  CUSTOM_OAUTH_USER_EMAIL_PATH: {{ $t.CUSTOM_OAUTH_USER_EMAIL_PATH | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "CUSTOM_OAUTH_USER_IMAGE_PATH") (ne (trim ($t.CUSTOM_OAUTH_USER_IMAGE_PATH | toString)) "") }}
+  CUSTOM_OAUTH_USER_IMAGE_PATH: {{ $t.CUSTOM_OAUTH_USER_IMAGE_PATH | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.NEXT_PUBLIC_POSTHOG_KEY }}NEXT_PUBLIC_POSTHOG_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.POSTHOG_API_HOST }}POSTHOG_API_HOST: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.POSTHOG_PERSONAL_API_KEY }}POSTHOG_PERSONAL_API_KEY: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.POSTHOG_PROJECT_ID }}POSTHOG_PROJECT_ID: {{ . | quote }}{{- end }}
+  # --- Google integrations ---
+  # Auth
+  {{- if and (hasKey $t "GOOGLE_AUTH_CLIENT_ID") (ne (trim ($t.GOOGLE_AUTH_CLIENT_ID | toString)) "") }}
+  GOOGLE_AUTH_CLIENT_ID: {{ $t.GOOGLE_AUTH_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GOOGLE_AUTH_CLIENT_SECRET") (ne (trim ($t.GOOGLE_AUTH_CLIENT_SECRET | toString)) "") }}
+  GOOGLE_AUTH_CLIENT_SECRET: {{ $t.GOOGLE_AUTH_CLIENT_SECRET | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.VERCEL_TOKEN }}VERCEL_TOKEN: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME }}NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.VERCEL_TEAM_ID }}VERCEL_TEAM_ID: {{ . | quote }}{{- end }}
+  # Sheets
+  {{- if and (hasKey $t "GOOGLE_SHEETS_CLIENT_ID") (ne (trim ($t.GOOGLE_SHEETS_CLIENT_ID | toString)) "") }}
+  GOOGLE_SHEETS_CLIENT_ID: {{ $t.GOOGLE_SHEETS_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GOOGLE_SHEETS_CLIENT_SECRET") (ne (trim ($t.GOOGLE_SHEETS_CLIENT_SECRET | toString)) "") }}
+  GOOGLE_SHEETS_CLIENT_SECRET: {{ $t.GOOGLE_SHEETS_CLIENT_SECRET | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY") (ne (trim ($t.NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY | toString)) "") }}
+  NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY: {{ $t.NEXT_PUBLIC_GOOGLE_SHEETS_API_KEY | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.META_SYSTEM_USER_TOKEN }}META_SYSTEM_USER_TOKEN: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID }}WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.WHATSAPP_PREVIEW_TEMPLATE_NAME }}WHATSAPP_PREVIEW_TEMPLATE_NAME: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.WHATSAPP_PREVIEW_TEMPLATE_LANG }}WHATSAPP_PREVIEW_TEMPLATE_LANG: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.WHATSAPP_CLOUD_API_URL }}WHATSAPP_CLOUD_API_URL: {{ . | quote }}{{- end }}
-  {{- with .Values.typebot.WHATSAPP_INTERACTIVE_GROUP_SIZE }}WHATSAPP_INTERACTIVE_GROUP_SIZE: {{ . | quote }}{{- end }}
+  # Gmail
+  {{- if and (hasKey $t "GMAIL_CLIENT_ID") (ne (trim ($t.GMAIL_CLIENT_ID | toString)) "") }}
+  GMAIL_CLIENT_ID: {{ $t.GMAIL_CLIENT_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "GMAIL_CLIENT_SECRET") (ne (trim ($t.GMAIL_CLIENT_SECRET | toString)) "") }}
+  GMAIL_CLIENT_SECRET: {{ $t.GMAIL_CLIENT_SECRET | quote }}
+  {{- end }}
 
-  {{- with .Values.typebot.NEXT_PUBLIC_PARTYKIT_HOST }}NEXT_PUBLIC_PARTYKIT_HOST: {{ . | quote }}{{- end }}
+  # Fonts
+  {{- if and (hasKey $t "NEXT_PUBLIC_GOOGLE_FONTS_API_KEY") (ne (trim ($t.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY | toString)) "") }}
+  NEXT_PUBLIC_GOOGLE_FONTS_API_KEY: {{ $t.NEXT_PUBLIC_GOOGLE_FONTS_API_KEY | quote }}
+  {{- end }}
+
+  # --- Storage (S3) ---
+  {{- if and (hasKey $t "S3_ACCESS_KEY") (ne (trim ($t.S3_ACCESS_KEY | toString)) "") }}
+  S3_ACCESS_KEY: {{ $t.S3_ACCESS_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "S3_SECRET_KEY") (ne (trim ($t.S3_SECRET_KEY | toString)) "") }}
+  S3_SECRET_KEY: {{ $t.S3_SECRET_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "S3_BUCKET") (ne (trim ($t.S3_BUCKET | toString)) "") }}
+  S3_BUCKET: {{ $t.S3_BUCKET | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "S3_PORT") (ne (trim ($t.S3_PORT | toString)) "") }}
+  S3_PORT: {{ $t.S3_PORT | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "S3_ENDPOINT") (ne (trim ($t.S3_ENDPOINT | toString)) "") }}
+  S3_ENDPOINT: {{ $t.S3_ENDPOINT | quote }}
+  {{- end }}
+  {{- if hasKey $t "S3_SSL" }}
+  S3_SSL: {{ ternary "true" "false" $t.S3_SSL | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "S3_REGION") (ne (trim ($t.S3_REGION | toString)) "") }}
+  S3_REGION: {{ $t.S3_REGION | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "S3_PUBLIC_CUSTOM_DOMAIN") (ne (trim ($t.S3_PUBLIC_CUSTOM_DOMAIN | toString)) "") }}
+  S3_PUBLIC_CUSTOM_DOMAIN: {{ $t.S3_PUBLIC_CUSTOM_DOMAIN | quote }}
+  {{- end }}
+
+  # --- Media APIs ---
+  {{- if and (hasKey $t "NEXT_PUBLIC_GIPHY_API_KEY") (ne (trim ($t.NEXT_PUBLIC_GIPHY_API_KEY | toString)) "") }}
+  NEXT_PUBLIC_GIPHY_API_KEY: {{ $t.NEXT_PUBLIC_GIPHY_API_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_UNSPLASH_APP_NAME") (ne (trim ($t.NEXT_PUBLIC_UNSPLASH_APP_NAME | toString)) "") }}
+  NEXT_PUBLIC_UNSPLASH_APP_NAME: {{ $t.NEXT_PUBLIC_UNSPLASH_APP_NAME | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_UNSPLASH_ACCESS_KEY") (ne (trim ($t.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY | toString)) "") }}
+  NEXT_PUBLIC_UNSPLASH_ACCESS_KEY: {{ $t.NEXT_PUBLIC_UNSPLASH_ACCESS_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_PEXELS_API_KEY") (ne (trim ($t.NEXT_PUBLIC_PEXELS_API_KEY | toString)) "") }}
+  NEXT_PUBLIC_PEXELS_API_KEY: {{ $t.NEXT_PUBLIC_PEXELS_API_KEY | quote }}
+  {{- end }}
+
+  # --- Tolgee (i18n) ---
+  {{- if and (hasKey $t "NEXT_PUBLIC_TOLGEE_API_KEY") (ne (trim ($t.NEXT_PUBLIC_TOLGEE_API_KEY | toString)) "") }}
+  NEXT_PUBLIC_TOLGEE_API_KEY: {{ $t.NEXT_PUBLIC_TOLGEE_API_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_TOLGEE_API_URL") (ne (trim ($t.NEXT_PUBLIC_TOLGEE_API_URL | toString)) "") }}
+  NEXT_PUBLIC_TOLGEE_API_URL: {{ $t.NEXT_PUBLIC_TOLGEE_API_URL | quote }}
+  {{- end }}
+
+  # --- WhatsApp (Preview) ---
+  {{- if and (hasKey $t "META_SYSTEM_USER_TOKEN") (ne (trim ($t.META_SYSTEM_USER_TOKEN | toString)) "") }}
+  META_SYSTEM_USER_TOKEN: {{ $t.META_SYSTEM_USER_TOKEN | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID") (ne (trim ($t.WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID | toString)) "") }}
+  WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID: {{ $t.WHATSAPP_PREVIEW_FROM_PHONE_NUMBER_ID | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "WHATSAPP_PREVIEW_TEMPLATE_NAME") (ne (trim ($t.WHATSAPP_PREVIEW_TEMPLATE_NAME | toString)) "") }}
+  WHATSAPP_PREVIEW_TEMPLATE_NAME: {{ $t.WHATSAPP_PREVIEW_TEMPLATE_NAME | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "WHATSAPP_PREVIEW_TEMPLATE_LANG") (ne (trim ($t.WHATSAPP_PREVIEW_TEMPLATE_LANG | toString)) "") }}
+  WHATSAPP_PREVIEW_TEMPLATE_LANG: {{ $t.WHATSAPP_PREVIEW_TEMPLATE_LANG | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "WHATSAPP_CLOUD_API_URL") (ne (trim ($t.WHATSAPP_CLOUD_API_URL | toString)) "") }}
+  WHATSAPP_CLOUD_API_URL: {{ $t.WHATSAPP_CLOUD_API_URL | quote }}
+  {{- end }}
+  {{- if hasKey $t "WHATSAPP_INTERACTIVE_GROUP_SIZE" }}
+  WHATSAPP_INTERACTIVE_GROUP_SIZE: {{ $t.WHATSAPP_INTERACTIVE_GROUP_SIZE | quote }}
+  {{- end }}
+
+  # --- Webhooks / PartyKit ---
+  {{- if and (hasKey $t "MESSAGE_WEBHOOK_URL") (ne (trim ($t.MESSAGE_WEBHOOK_URL | toString)) "") }}
+  MESSAGE_WEBHOOK_URL: {{ $t.MESSAGE_WEBHOOK_URL | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "USER_CREATED_WEBHOOK_URL") (ne (trim ($t.USER_CREATED_WEBHOOK_URL | toString)) "") }}
+  USER_CREATED_WEBHOOK_URL: {{ $t.USER_CREATED_WEBHOOK_URL | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_PARTYKIT_HOST") (ne (trim ($t.NEXT_PUBLIC_PARTYKIT_HOST | toString)) "") }}
+  NEXT_PUBLIC_PARTYKIT_HOST: {{ $t.NEXT_PUBLIC_PARTYKIT_HOST | quote }}
+  {{- end }}
+
+  # --- Analytics / Vercel ---
+  {{- if and (hasKey $t "NEXT_PUBLIC_POSTHOG_KEY") (ne (trim ($t.NEXT_PUBLIC_POSTHOG_KEY | toString)) "") }}
+  NEXT_PUBLIC_POSTHOG_KEY: {{ $t.NEXT_PUBLIC_POSTHOG_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "POSTHOG_API_HOST") (ne (trim ($t.POSTHOG_API_HOST | toString)) "") }}
+  POSTHOG_API_HOST: {{ $t.POSTHOG_API_HOST | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "POSTHOG_PERSONAL_API_KEY") (ne (trim ($t.POSTHOG_PERSONAL_API_KEY | toString)) "") }}
+  POSTHOG_PERSONAL_API_KEY: {{ $t.POSTHOG_PERSONAL_API_KEY | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "POSTHOG_PROJECT_ID") (ne (trim ($t.POSTHOG_PROJECT_ID | toString)) "") }}
+  POSTHOG_PROJECT_ID: {{ $t.POSTHOG_PROJECT_ID | quote }}
+  {{- end }}
+
+  {{- if and (hasKey $t "VERCEL_TOKEN") (ne (trim ($t.VERCEL_TOKEN | toString)) "") }}
+  VERCEL_TOKEN: {{ $t.VERCEL_TOKEN | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME") (ne (trim ($t.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME | toString)) "") }}
+  NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME: {{ $t.NEXT_PUBLIC_VERCEL_VIEWER_PROJECT_NAME | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "VERCEL_TEAM_ID") (ne (trim ($t.VERCEL_TEAM_ID | toString)) "") }}
+  VERCEL_TEAM_ID: {{ $t.VERCEL_TEAM_ID | quote }}
+  {{- end }}
+
+  # --- Viewer 404 copy ---
+  {{- if and (hasKey $t "NEXT_PUBLIC_VIEWER_404_TITLE") (ne (trim ($t.NEXT_PUBLIC_VIEWER_404_TITLE | toString)) "") }}
+  NEXT_PUBLIC_VIEWER_404_TITLE: {{ $t.NEXT_PUBLIC_VIEWER_404_TITLE | quote }}
+  {{- end }}
+  {{- if and (hasKey $t "NEXT_PUBLIC_VIEWER_404_SUBTITLE") (ne (trim ($t.NEXT_PUBLIC_VIEWER_404_SUBTITLE | toString)) "") }}
+  NEXT_PUBLIC_VIEWER_404_SUBTITLE: {{ $t.NEXT_PUBLIC_VIEWER_404_SUBTITLE | quote }}
+  {{- end }}
